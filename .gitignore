@@ -8,3 +8,31 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Milvus database files
+*.db
+milvus_*.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Test results and logs
+res.json
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Performance test files
+quick_performance_test.py

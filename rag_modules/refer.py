@@ -6,8 +6,7 @@ def get_reference_with_filter(
         query: str,
         collection_name: str = "rag_docs",
         limit: int = 10,
-        excluded_pdfs: Optional[List[str]] = None,
-        only_unblocked: bool = True,
+        included_pdfs: Optional[List[str]] = None,
         database: str = "milvus_rag.db"
 ) -> List[Dict[str, any]]:
     """
@@ -17,8 +16,7 @@ def get_reference_with_filter(
         query: 查询文本
         collection_name: 集合名称
         limit: 返回结果数量限制
-        excluded_pdfs: 要排除的PDF文件名列表
-        only_unblocked: 是否只搜索未被屏蔽的文档
+        included_pdfs: 要使用的PDF文件名列表
         database: 数据库文件路径
     
     Returns:
@@ -26,24 +24,15 @@ def get_reference_with_filter(
     """
     
     # 根据过滤条件选择搜索方法
-    if excluded_pdfs and only_unblocked:
-        # 既要排除特定PDF又要排除被屏蔽的文档
-        excluded_conditions = [f"pdf_name != '{pdf}'" for pdf in excluded_pdfs]
-        blocked_condition = "is_blocked == false"
-        expr = blocked_condition + " AND " + " AND ".join(excluded_conditions)
-        results = search.search_with_metadata_filter([query], collection_name, limit, expr, database=database)
-    elif excluded_pdfs:
-        # 只排除特定PDF
-        if len(excluded_pdfs) == 1:
-            expr = f"pdf_name != '{excluded_pdfs[0]}'"
+    if included_pdfs:
+        # 只搜索指定的PDF文件
+        if len(included_pdfs) == 1:
+            expr = f"pdf_name == '{included_pdfs[0]}'"
         else:
-            # 对于多个PDF，使用 NOT IN
-            pdf_list_str = "(" + ", ".join([f"'{pdf}'" for pdf in excluded_pdfs]) + ")"
-            expr = f"pdf_name not in {pdf_list_str}"
+            # 对于多个PDF，使用 IN
+            pdf_list_str = "(" + ", ".join([f"'{pdf}'" for pdf in included_pdfs]) + ")"
+            expr = f"pdf_name in {pdf_list_str}"
         results = search.search_with_metadata_filter([query], collection_name, limit, expr, database=database)
-    elif only_unblocked:
-        # 只排除被屏蔽的文档
-        results = search.search_only_unblocked([query], collection_name, limit, database)
     else:
         # 不使用任何过滤
         results = search.search_with_metadata_filter([query], collection_name, limit, database=database)

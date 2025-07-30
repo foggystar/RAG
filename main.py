@@ -1,74 +1,102 @@
 from rag_modules import insert, clear, refer
-from rag_modules.pdf_manager import PDFManager
-
+# from rag_modules.pdf_manager import PDFManager
+from utilties import load_pdf, query
+import sys
 
 def main():
-    """RAG系统基础演示"""
-    print("=== RAG 检索增强生成系统演示 ===\n")
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <command> [args]")
+        print("Commands: --load <pdf_name>, --clear, --query <question>, --include <pdf_name>, --split")
+        return
+    pdfs=[]
+    question_parts = []
+    toLoad = []
+    should_clear = False
+    split = False
+    # Process each command in sequence
+    i = 1
+
+    while i < len(sys.argv):
+        command = sys.argv[i]
+        
+        match command:
+            case "--load":
+                if i + 1 >= len(sys.argv):
+                    print("Usage: python main.py load <pdf_name>")
+                    return
+                pdf_name = sys.argv[i + 1]
+                toLoad.append(pdf_name)
+                i += 2  # Skip the pdf_name argument
+            case "--clear":
+                should_clear = True
+                i += 1
+            case "--split":
+                split = True
+                i += 1
+            case "--query":
+                if i + 1 >= len(sys.argv):
+                    print("Usage: python main.py query <question>")
+                    return
+                # Find the next command or end of arguments for the question
+                
+                j = i + 1
+                question_parts.append(sys.argv[j])
+                if not question_parts:
+                    print("Usage: python main.py query <question>")
+                    return
+                
+                i = j + 1  # Move to next command
+            case "--include":
+                if i + 1 >= len(sys.argv):
+                    print("Usage: python main.py include <pdf_name>")
+                    return  
+                pdfs.append(sys.argv[i + 1])
+                # Add your include functionality here
+                i += 2  # Skip the pdf_name argument
+            case _:
+                print(f"Unknown command: {command}")
+                print("Available commands: --load, --clear, --query, --include, --split")
+                i += 1
+
+    # Load PDFs if any
+    if toLoad:
+        for pdf_name in toLoad:
+            try:
+                load_pdf.load_pdf(pdf_name)
+                print(f"Loaded PDF: {pdf_name}")
+            except Exception as e:
+                print(f"Failed to load PDF {pdf_name}: {e}")
+    if should_clear:
+        clear.clear_data()
+    # Process questions
+    if split and question_parts:
+        # Apply split to all questions at once to avoid modifying list during iteration
+        original_questions = question_parts.copy()
+        question_parts = []
+        for question in original_questions:
+            try:
+                split_questions = query.split_query(question)
+                if isinstance(split_questions, list):
+                    question_parts.extend(split_questions)
+                else:
+                    # If split_query returns a string, split by newlines or keep as single question
+                    question_parts.append(split_questions)
+            except Exception as e:
+                print(f"Failed to split question '{question}': {e}")
+                question_parts.append(question)  # Keep original question if split fails
     
-    collection_name = "rag_docs"
-    
-    # 科学知识库示例数据
-    docs = [
-        "牛顿运动定律是经典力学的基础。",
-        "元素周期表按原子序数和性质组织元素。",
-        "DNA携带所有生物体的遗传信息。",
-        "光合作用将阳光转化为植物的化学能。",
-        "爱因斯坦的相对论彻底改变了我们对时空的理解。",
-        "线粒体被称为细胞的动力工厂。",
-        "量子力学描述原子尺度物质的行为。",
-        "真空中的光速约为299,792,458米/秒。",
-        "化学键在原子共享或转移电子时形成。",
-        "人脑约含有860亿个神经元。"
-    ]
-    
-    try:
-        # 1. 清理旧数据
-        print("1. 清理旧数据...")
-        clear.clear_data(collection_name=collection_name)
-        
-        # 2. 插入科学知识库数据
-        print("2. 插入科学知识库数据...")
-        pdf_names = ["科学知识库.pdf"] * len(docs)
-        page_numbers = list(range(1, len(docs) + 1))
-        is_blocked_list = [False] * len(docs)  # 全部未屏蔽
-        
-        insert.insert_data_with_metadata(
-            texts=docs,
-            pdf_names=pdf_names,
-            page_numbers=page_numbers,
-            is_blocked_list=is_blocked_list,
-            collection_name=collection_name
-        )
-        
-        # 3. 搜索测试
-        print("\n3. 搜索测试...")
-        queries = ["什么是DNA?", "光速是多少?", "牛顿定律"]
-        
-        for query in queries:
-            print(f"\n查询: {query}")
-            results = refer.get_reference_with_filter(
-                query=query,
-                collection_name=collection_name,
-                only_unblocked=True,
-                limit=3
-            )
-            
-            for result in results[:2]:  # 只显示前2个结果
-                print(f"  - 相关度: {result['relevance_score']:.3f}")
-                print(f"    页码: {result['page_number']}, 内容: {result['text'][:50]}...")
-        
-        # 4. PDF管理演示
-        print("\n4. PDF管理信息:")
-        manager = PDFManager(collection_name)
-        stats = manager.get_pdf_stats()
-        print(f"  总PDF数: {stats.get('total_pdfs', 0)}")
-        print(f"  文档块数: {stats.get('total_chunks', 0)}")
-        
-        print("\n✓ 演示完成！")
-        
-    except Exception as e:
-        print(f"✗ 演示失败: {e}")
+    for question in question_parts:
+        try:
+            response = query.query_to_database(question, pdfs)
+            print(f"Query: {question}\n Results:")
+            if response:
+                for result in response:
+                    print(f"PDF Name: {result['pdf_name']}, Page: {result['page_number']}, Content: {result['text'][:50]}...")
+                    print("-" * 80)
+            else:
+                print("No results found for the query.")
+        except Exception as e:
+            print(f"Failed to query '{question}': {e}")
 
 
 if __name__ == "__main__":

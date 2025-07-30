@@ -5,7 +5,11 @@ description = "基于Milvus的RAG检索增强生成系统"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "bs4>=0.0.2",
+    "langchain-community>=0.3.27",
     "openai>=1.97.1",
+    "pdfminer>=20191125",
+    "pdfminer-six>=20250506",
     "pymilvus>=2.5.14",
-    "requests>=2.31.0"
+    "requests>=2.31.0",
 ]

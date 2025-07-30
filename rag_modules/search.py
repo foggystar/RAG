@@ -51,30 +51,19 @@ def search_with_metadata_filter(
         if expr:
             logger.info(f"Using filter expression: {expr}")
         
-        # 执行搜索
-        results = client.search(
-            collection_name=collection_name,
-            data=query_vectors,
-            limit=limit * 2,  # 获取更多结果以便过滤
-            output_fields=output_fields
-            # 注意：MilvusClient (Lite) 可能不支持复杂的过滤表达式
-            # 如果需要过滤，可能需要在结果中手动过滤
-        )
+        # 执行搜索 - 使用 Milvus 原生过滤
+        search_params = {
+            "collection_name": collection_name,
+            "data": query_vectors,
+            "limit": limit,
+            "output_fields": output_fields
+        }
         
-        # 手动应用过滤逻辑
+        # 如果有过滤表达式，添加到搜索参数中
         if expr:
-            filtered_results = []
-            for query_results in results:
-                filtered_query_results = []
-                for hit in query_results:
-                    entity = hit.get('entity', {})
-                    # 简单的过滤逻辑实现
-                    if _apply_filter(entity, expr):
-                        filtered_query_results.append(hit)
-                    if len(filtered_query_results) >= limit:
-                        break
-                filtered_results.append(filtered_query_results)
-            results = filtered_results
+            search_params["filter"] = expr
+        
+        results = client.search(**search_params)
         
         logger.info(f"Search completed, found {len(results)} result groups")
         return results
@@ -82,54 +71,6 @@ def search_with_metadata_filter(
     except Exception as e:
         logger.error(f"Search failed: {e}")
         raise Exception(f"Search operation failed: {e}")
-
-
-def _apply_filter(entity: dict, expr: str) -> bool:
-    """
-    手动应用过滤表达式
-    
-    Args:
-        entity: 实体数据
-        expr: 过滤表达式
-    
-    Returns:
-        是否通过过滤
-    """
-    try:
-        # 简单的过滤逻辑实现
-        if "is_blocked == false" in expr:
-            if entity.get('is_blocked', True):
-                return False
-        
-        if "is_blocked == true" in expr:
-            if not entity.get('is_blocked', False):
-                return False
-        
-        # 处理 pdf_name 过滤
-        if "pdf_name !=" in expr:
-            # 提取要排除的PDF名称
-            import re
-            matches = re.findall(r"pdf_name != '([^']+)'", expr)
-            for pdf_name in matches:
-                if entity.get('pdf_name', '') == pdf_name:
-                    return False
-        
-        if "pdf_name not in" in expr:
-            # 提取要排除的PDF列表
-            import re
-            match = re.search(r"pdf_name not in \(([^)]+)\)", expr)
-            if match:
-                pdf_list_str = match.group(1)
-                excluded_pdfs = [pdf.strip(" '\"") for pdf in pdf_list_str.split(',')]
-                if entity.get('pdf_name', '') in excluded_pdfs:
-                    return False
-        
-        return True
-        
-    except Exception:
-        # 如果过滤失败，返回True（不过滤）
-        return True
-
 
 
 def search_only_unblocked(
@@ -152,6 +93,76 @@ def search_only_unblocked(
     """
     expr = "is_blocked == false"
     return search_with_metadata_filter(query, collection_name, limit, expr, database=database)
+
+
+def simple_search(
+    query: List[str],
+    collection_name: str = "demo_collection",
+    filter_expr: Optional[str] = None,
+    limit: int = 10,
+    output_fields: Optional[List[str]] = None,
+    database: str = "milvus_rag.db"
+) -> List[Dict[str, Any]]:
+    """
+    简化的搜索函数，模仿 sample.py 的用法
+    
+    Args:
+        query: 查询文本列表
+        collection_name: 集合名称
+        filter_expr: 过滤表达式，例如: "subject == 'biology'"
+        limit: 返回结果数量限制
+        output_fields: 要返回的字段列表
+        database: 数据库文件路径
+    
+    Returns:
+        搜索结果列表
+        
+    Example:
+        # 类似 sample.py 的用法
+        results = simple_search(
+            query=["tell me AI related information"],
+            filter_expr="subject == 'biology'",
+            limit=2,
+            output_fields=["text", "subject"]
+        )
+    """
+    try:
+        # 获取查询向量
+        query_vectors = get_batch_embeddings_large_scale(query)
+        
+        # 创建Milvus客户端
+        client = MilvusClient(database)
+        
+        # 检查集合是否存在
+        if not client.has_collection(collection_name=collection_name):
+            raise Exception(f"Collection '{collection_name}' does not exist in database")
+        
+        logger.info(f"Performing simple search in collection '{collection_name}'")
+        if filter_expr:
+            logger.info(f"Using filter: {filter_expr}")
+        
+        # 构建搜索参数
+        search_params = {
+            "collection_name": collection_name,
+            "data": query_vectors,
+            "limit": limit
+        }
+        
+        if filter_expr:
+            search_params["filter"] = filter_expr
+            
+        if output_fields:
+            search_params["output_fields"] = output_fields
+        
+        # 执行搜索
+        results = client.search(**search_params)
+        
+        logger.info(f"Simple search completed, found {len(results)} result groups")
+        return results
+        
+    except Exception as e:
+        logger.error(f"Simple search failed: {e}")
+        raise Exception(f"Simple search operation failed: {e}")
 
 
 

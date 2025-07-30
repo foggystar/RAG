@@ -280,65 +280,194 @@ for ref in references:
     print("-" * 50)
 ```
 
-### 元数据过滤示例
+# RAG 检索增强生成系统
 
-参考 `metadata_filter_example.py` 文件，该文件演示了：
+基于 Milvus 向量数据库的轻量级检索增强生成(RAG)系统，支持PDF文档管理、元数据过滤、重排序等功能。
 
-1. 创建带元数据的文档集合
-2. 插入带有PDF名称、页码、屏蔽状态的数据
-3. 多种过滤搜索策略：
-   - 普通搜索（无过滤）
-   - 只搜索未屏蔽文档
-   - 排除特定PDF
-   - 复合过滤条件
+## 🚀 核心特性
 
-运行示例：
+- **向量化文本存储**: 使用 Milvus 向量数据库存储文本 embeddings
+- **元数据过滤**: 支持基于PDF文件名、页码、屏蔽状态的过滤搜索
+- **智能重排序**: 集成重排序算法提升搜索准确性
+- **PDF文档管理**: 支持文档屏蔽/解除屏蔽功能
+
+## 📁 项目结构
+
+```
+RAG/
+├── main.py                    # 主程序入口和演示
+├── pyproject.toml            # 项目配置和依赖管理
+├── milvus_rag.db            # Milvus 数据库文件
+├── README.md                # 项目说明文档
+├── uv.lock                  # 依赖锁定文件
+├── docs/                    # 文档目录
+└── rag_modules/             # 核心模块目录
+    ├── embedding.py         # 文本向量化模块
+    ├── insert.py            # 数据插入模块
+    ├── search.py            # 搜索模块
+    ├── refer.py             # 参考文档获取模块
+    ├── reranker.py          # 重排序模块
+    ├── pdf_manager.py       # PDF文档管理模块
+    └── clear.py             # 数据清理模块
+```
+
+## 🛠️ 快速开始
+
+### 环境要求
+
+- Python >= 3.12
+- UV 包管理器 (推荐) 或 pip
+
+### 安装
+
+使用 UV (推荐):
 ```bash
-python metadata_filter_example.py
+cd RAG
+uv sync
+```
+
+使用 pip:
+```bash
+pip install openai pymilvus requests
+```
+
+### 配置
+
+设置API密钥：
+```bash
+export siliconflow_api_key="your_api_key_here"
+```
+
+### 运行演示
+
+```bash
+python main.py
+```
+
+## � 核心模块
+
+### 1. embedding.py - 文本向量化
+
+```python
+from rag_modules.embedding import get_embedding, get_batch_embeddings
+
+# 单个文本向量化
+vector = get_embedding("人工智能是计算机科学的一个分支")
+
+# 批量文本向量化
+texts = ["文本1", "文本2", "文本3"]
+vectors = get_batch_embeddings(texts)
+```
+
+### 2. insert.py - 数据插入
+
+```python
+from rag_modules.insert import insert_data_with_metadata
+
+texts = ["文档内容1", "文档内容2"]
+pdf_names = ["document1.pdf", "document2.pdf"]
+page_numbers = [1, 1]
+is_blocked_list = [False, True]
+
+insert_data_with_metadata(
+    texts=texts,
+    pdf_names=pdf_names,
+    page_numbers=page_numbers,
+    is_blocked_list=is_blocked_list
+)
+```
+
+### 3. search.py - 搜索
+
+```python
+from rag_modules.search import search_with_metadata_filter, search_only_unblocked
+
+# 基础搜索
+results = search_with_metadata_filter(
+    query=["什么是人工智能"],
+    limit=5
+)
+
+# 只搜索未屏蔽文档
+results = search_only_unblocked(
+    query=["深度学习"],
+    limit=5
+)
+```
+
+### 4. refer.py - 参考文档
+
+```python
+from rag_modules.refer import get_reference_with_filter
+
+# 获取参考文档，排除特定PDF且只包含未屏蔽文档
+references = get_reference_with_filter(
+    query="自然语言处理",
+    excluded_pdfs=["old_version.pdf"],
+    only_unblocked=True,
+    limit=5
+)
+```
+
+### 5. pdf_manager.py - PDF管理
+
+```python
+from rag_modules.pdf_manager import PDFManager
+
+manager = PDFManager()
+
+# 列出所有PDF
+all_pdfs = manager.list_pdfs()
+
+# 获取统计信息
+stats = manager.get_pdf_stats()
+```
+
+## 🎯 完整使用示例
+
+```python
+from rag_modules.insert import insert_data_with_metadata
+from rag_modules.refer import get_reference_with_filter
+from rag_modules.clear import clear_data
+
+# 1. 清理旧数据
+clear_data()
+
+# 2. 插入数据
+texts = ["人工智能是计算机科学的一个分支", "机器学习是AI的重要组成部分"]
+pdf_names = ["AI教程.pdf", "ML指南.pdf"]
+page_numbers = [1, 1]
+is_blocked_list = [False, False]
+
+insert_data_with_metadata(
+    texts=texts,
+    pdf_names=pdf_names,
+    page_numbers=page_numbers,
+    is_blocked_list=is_blocked_list
+)
+
+# 3. 搜索并获取参考文档
+references = get_reference_with_filter(
+    query="什么是人工智能",
+    only_unblocked=True,
+    limit=3
+)
+
+# 4. 处理结果
+for ref in references:
+    print(f"来源: {ref['pdf_name']}")
+    print(f"相关度: {ref['relevance_score']:.3f}")
+    print(f"内容: {ref['text']}")
 ```
 
 ## 🔧 配置选项
 
-### Milvus配置
 - **数据库文件**: 默认为 `milvus_rag.db`
 - **集合名称**: 默认为 `rag_docs`
 - **向量维度**: 768维 (使用Qwen3-Embedding-4B模型)
-
-### 搜索配置
-- **默认返回数量**: 10条结果
 - **重排序阈值**: 相关度分数 >= 0.2
-- **最大重排序数量**: 5条
-
-### 向量化配置
-- **模型**: Qwen/Qwen3-Embedding-4B
-- **API端点**: SiliconFlow API
-- **并发数**: 可配置的批量处理并发数
-
-## 🤝 开发指南
-
-### 添加新的过滤条件
-
-1. 在 `search.py` 的 `_apply_filter()` 函数中添加新的过滤逻辑
-2. 更新相应的文档和示例
-
-### 扩展元数据字段
-
-1. 修改 `insert.py` 中的集合Schema
-2. 更新插入和搜索函数的参数
-3. 相应更新文档管理功能
-
-### 性能优化
-
-- 调整 Milvus 索引参数
-- 优化批量处理的并发数
-- 实施缓存策略
-
-## 📄 许可证
-
-暂无
 
 ## 🔗 相关资源
 
 - [Milvus 官方文档](https://milvus.io/docs)
 - [SiliconFlow API 文档](https://docs.siliconflow.cn/)
-- [项目技术栈详细说明](docs/RAG技术栈概览.md)

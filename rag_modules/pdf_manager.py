@@ -154,39 +154,3 @@ class PDFManager:
         except Exception as e:
             print(f"获取统计信息失败: {e}")
             return {}
-
-
-def main():
-    """示例用法"""
-    
-    # 创建PDF管理器
-    manager = PDFManager("rag_docs_demo")
-    
-    print("=== PDF文档管理示例 ===\n")
-    
-    # 列出所有PDF
-    print("1. 所有PDF文档:")
-    all_pdfs = manager.list_pdfs()
-    for pdf in all_pdfs:
-        status = "已屏蔽" if pdf['is_blocked'] else "正常"
-        print(f"  - {pdf['pdf_name']} ({status}) - {pdf['chunk_count']} 个文本块")
-    
-    # 列出被屏蔽的PDF
-    print("\n2. 被屏蔽的PDF文档:")
-    blocked_pdfs = manager.list_pdfs(only_blocked=True)
-    for pdf in blocked_pdfs:
-        print(f"  - {pdf['pdf_name']} - {pdf['chunk_count']} 个文本块")
-    
-    # 获取统计信息
-    print("\n3. 统计信息:")
-    stats = manager.get_pdf_stats()
-    print(f"  总PDF数: {stats.get('total_pdfs', 0)}")
-    print(f"  被屏蔽PDF数: {stats.get('blocked_pdfs', 0)}")
-    print(f"  正常PDF数: {stats.get('unblocked_pdfs', 0)}")
-    print(f"  总文本块数: {stats.get('total_chunks', 0)}")
-    print(f"  被屏蔽文本块数: {stats.get('blocked_chunks', 0)}")
-    print(f"  正常文本块数: {stats.get('unblocked_chunks', 0)}")
-
-
-if __name__ == "__main__":
-    main()

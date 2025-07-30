@@ -131,38 +131,6 @@ def _apply_filter(entity: dict, expr: str) -> bool:
         return True
 
 
-# def search_exclude_pdfs(
-#     query: List[str],
-#     excluded_pdfs: List[str],
-#     collection_name: str = "rag_docs",
-#     limit: int = 10
-# ) -> List[Dict[str, Any]]:
-#     """
-#     搜索时排除指定的PDF文件
-    
-#     Args:
-#         query: 查询文本列表
-#         excluded_pdfs: 要排除的PDF文件名列表
-#         collection_name: 集合名称
-#         limit: 返回结果数量限制
-    
-#     Returns:
-#         搜索结果列表
-#     """
-#     if not excluded_pdfs:
-#         # 如果没有要排除的PDF，直接搜索
-#         return search_with_metadata_filter(query, collection_name, limit)
-    
-#     # 构建过滤表达式
-#     if len(excluded_pdfs) == 1:
-#         expr = f"pdf_name != '{excluded_pdfs[0]}'"
-#     else:
-#         # 对于多个PDF，使用 NOT IN
-#         pdf_list_str = "(" + ", ".join([f"'{pdf}'" for pdf in excluded_pdfs]) + ")"
-#         expr = f"pdf_name not in {pdf_list_str}"
-    
-#     return search_with_metadata_filter(query, collection_name, limit, expr)
-
 
 def search_only_unblocked(
     query: List[str],
@@ -186,52 +154,4 @@ def search_only_unblocked(
     return search_with_metadata_filter(query, collection_name, limit, expr, database=database)
 
 
-# def search(
-#     query: List[str],
-#     database: str = "milvus_rag.db",
-#     collection_name: str = "demo_collection",
-#     limit: int = 10
-# ) -> List[Dict[str, Any]]:
-#     """
-#     在Milvus数据库中搜索与查询最相似的向量 (保持向后兼容性)
-    
-#     Args:
-#         query: 查询文本列表
-#         database: 数据库文件路径
-#         collection_name: 集合名称
-#         limit: 返回结果数量限制
-    
-#     Returns:
-#         搜索结果列表
-    
-#     Raises:
-#         Exception: 当数据库连接失败或搜索失败时抛出异常
-#     """
-#     try:
-#         # 获取查询向量
-#         query_vectors = get_batch_embeddings_large_scale(query)
-        
-#         # 创建Milvus客户端
-#         client = MilvusClient(database)
-        
-#         # 检查集合是否存在
-#         if not client.has_collection(collection_name=collection_name):
-#             raise Exception(f"Collection '{collection_name}' does not exist in database")
-        
-#         logger.info(f"Searching in collection '{collection_name}' with {len(query)} queries")
-        
-#         # 执行搜索
-#         res = client.search(
-#             collection_name=collection_name,  # target collection
-#             data=query_vectors,  # query vectors
-#             limit=limit,  # number of returned entities
-#             output_fields=["text", "subject"],  # specifies fields to be returned
-#         )
-        
-#         logger.info(f"Search completed, found {len(res)} result groups")
-#         return res
-        
-#     except Exception as e:
-#         logger.error(f"Search failed: {e}")
-#         raise Exception(f"Search operation failed: {e}")
 

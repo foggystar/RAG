@@ -1,14 +1,11 @@
 [project]
 name = "rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "基于Milvus的RAG检索增强生成系统"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.116.1",
-    "langchain-google-genai>=2.1.8",
-    "langchain-milvus>=0.2.1",
     "openai>=1.97.1",
     "pymilvus>=2.5.14",
-    "pypdf>=5.9.0",
+    "requests>=2.31.0"
 ]

@@ -1,4 +1,4 @@
-from rag_modules import insert, clear, refer
+from rag_modules import clear
 # from rag_modules.pdf_manager import PDFManager
 from utilties import load_pdf, query
 import sys
@@ -88,11 +88,12 @@ def main():
     for question in question_parts:
         try:
             response = query.query_to_database(question, pdfs)
-            print(f"Query: {question}\n Results:")
+            # print(f"Query: {question}\n Results:")
             if response:
-                for result in response:
-                    print(f"PDF Name: {result['pdf_name']}, Page: {result['page_number']}, Content: {result['text'][:50]}...")
-                    print("-" * 80)
+                # for result in response:
+                #     print(f"PDF Name: {result['pdf_name']}, Page: {result['page_number']}, Content: {result['text'][:50]}...")
+                #     print("-" * 80)
+                print(query.ans(questions=question,reference= response))
             else:
                 print("No results found for the query.")
         except Exception as e:

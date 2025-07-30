@@ -70,3 +70,47 @@ if __name__ == "__main__":
         print(f"Unexpected error: {e}")
     
     print("\nModule loaded successfully!")
+
+def ans(
+    questions: List[str],
+    reference: List[dict],
+    model: str = "moonshotai/Kimi-K2-Instruct",
+    api_key: Optional[str] = None
+) -> str:
+    
+    if api_key is None:
+        api_key = os.getenv('siliconflow_api_key')
+        if not api_key:
+            raise ValueError("API key not found. Please set siliconflow_api_key environment variable.")
+    
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.siliconflow.cn/v1"
+    )
+    
+    # Format reference context
+    context = ""
+    for ref in reference:
+        context += f"Source: {ref.get('pdf_name', 'Unknown')} (Page {ref.get('page_number', 'N/A')})\n"
+        context += f"Content: {ref.get('text', '')}\n\n"
+    
+    # Combine questions into a single query
+    query = "\n".join([f"- {q}" for q in questions])
+    print("Starting answer generation...")
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context. Provide page numbers of the context in your answer. Use Chinese to answer."},
+                {"role": "user", "content": f"Questions:\n{query}\n\nContext:\n{context}"}
+            ],
+            max_tokens=5000,
+            temperature=0.7
+        )
+        
+        content = response.choices[0].message.content
+        return content if content else "No answer generated."
+    
+    except Exception as e:
+        print(f"Warning: Failed to generate answer: {e}")
+        return "Failed to generate answer due to an error."

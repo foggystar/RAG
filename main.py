@@ -93,7 +93,7 @@ def main():
                 # for result in response:
                 #     print(f"PDF Name: {result['pdf_name']}, Page: {result['page_number']}, Content: {result['text'][:50]}...")
                 #     print("-" * 80)
-                print(query.ans(questions=question,reference= response))
+                print(query.generate_answer([question], response))
             else:
                 print("No results found for the query.")
         except Exception as e:

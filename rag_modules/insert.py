@@ -1,6 +1,13 @@
 from typing import List, Optional
 from pymilvus import MilvusClient
 from .embedding import get_batch_embeddings_large_scale
+import sys
+import os
+
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config import Config, ModelType
 
 
 def insert_data_with_metadata(
@@ -8,50 +15,77 @@ def insert_data_with_metadata(
     pdf_names: List[str],
     page_numbers: List[int],
     is_blocked_list: Optional[List[bool]] = None,
-    database: str = "milvus_rag.db", 
-    collection_name: str = "rag_docs"
-):
-    """插入带有元数据的数据到Milvus集合"""
+    database: Optional[str] = None, 
+    collection_name: Optional[str] = None
+) -> bool:
+    """
+    Insert data with metadata into Milvus collection
+    
+    Args:
+        texts: List of text content
+        pdf_names: List of PDF file names
+        page_numbers: List of page numbers
+        is_blocked_list: List of blocked status (defaults to False for all)
+        database: Database file path (uses config default if not provided)
+        collection_name: Collection name (uses config default if not provided)
+    
+    Returns:
+        Whether the operation was successful
+    """
+    # Use config defaults if not specified
+    if database is None:
+        database = Config.DATABASE.path
+    if collection_name is None:
+        collection_name = Config.DATABASE.collection_name
     
     if is_blocked_list is None:
         is_blocked_list = [False] * len(texts)
     
-    # 验证输入长度一致性
+    # Validate input length consistency
     if not (len(texts) == len(pdf_names) == len(page_numbers) == len(is_blocked_list)):
-        raise ValueError("所有输入列表长度必须一致")
+        raise ValueError("All input lists must have the same length")
     
-    # 创建Milvus客户端（使用Lite版本保持一致性）
-    client = MilvusClient(database)
-    
-    # 检查集合是否存在，不存在则创建带有元数据的集合
-    if not client.has_collection(collection_name=collection_name):
-        print(f"集合 '{collection_name}' 不存在，创建新集合...")
-        # 为MilvusClient创建带有元数据的集合
-        client.create_collection(
-            collection_name=collection_name,
-            dimension=768,  # 向量维度
-            id_type="int",
-            primary_field_name="id",
-            vector_field_name="vector"
-        )
-    
-    # 获取embedding向量
-    embeddings = get_batch_embeddings_large_scale(texts)
-    
-    # 准备数据 - 适配MilvusClient格式
-    data = []
-    for i in range(len(texts)):
-        data.append({
-            "id": i,
-            "vector": embeddings[i],
-            "text_content": texts[i],
-            "pdf_name": pdf_names[i],
-            "page_number": page_numbers[i],
-            "is_blocked": is_blocked_list[i]
-        })
-    
-    # 插入数据
-    res = client.insert(collection_name=collection_name, data=data)
-    
-    print(f"成功插入 {len(texts)} 条记录到集合 '{collection_name}'")
-    return res
+    try:
+        # Create Milvus client
+        client = MilvusClient(database)
+        
+        # Check if collection exists, create with metadata if it doesn't
+        if not client.has_collection(collection_name=collection_name):
+            print(f"Collection '{collection_name}' does not exist, creating new collection...")
+            # Create collection with metadata for MilvusClient
+            client.create_collection(
+                collection_name=collection_name,
+                dimension=Config.MODELS[ModelType.EMBEDDING].dimensions,
+                id_type="int",
+                primary_field_name="id",
+                vector_field_name="vector"
+            )
+            print(f"Collection '{collection_name}' created successfully")
+        
+        # Get embedding vectors
+        print(f"Generating embedding vectors for {len(texts)} texts...")
+        embeddings = get_batch_embeddings_large_scale(texts)
+        print(f"Embedding vector generation completed")
+        
+        # Prepare data for insertion - adapt to MilvusClient format
+        data = []
+        for i in range(len(texts)):
+            data.append({
+                "id": i,
+                "vector": embeddings[i],
+                "text_content": texts[i],
+                "pdf_name": pdf_names[i],
+                "page_number": page_numbers[i],
+                "is_blocked": is_blocked_list[i]
+            })
+        
+        # Execute insertion operation
+        print(f"Inserting {len(data)} records into collection '{collection_name}'...")
+        res = client.insert(collection_name=collection_name, data=data)
+        
+        print(f"Data insertion completed, inserted {len(texts)} records")
+        return True
+        
+    except Exception as e:
+        print(f"Failed to insert data: {e}")
+        return False

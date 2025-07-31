@@ -1,46 +1,45 @@
 import os
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Optional
-from openai import OpenAI
+from typing import List, Optional, Dict, Any
 
-# Add parent directory to path when running this file directly
-if __name__ == "__main__":
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rag_modules import refer
+from api_client import ChatClient
+from config import Config, ModelType
+
 
 def split_query(
-    query: str, 
-    model: str = "Qwen/Qwen3-30B-A3B",
+    query: str,
     api_key: Optional[str] = None
 ) -> List[str]:
+    """
+    Split a complex query into 2-3 sub-questions
     
-    if api_key is None:
-        api_key = os.getenv('siliconflow_api_key')
-        if not api_key:
-            raise ValueError("API key not found. Please set siliconflow_api_key environment variable.")
-    
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.siliconflow.cn/v1"
-    )
-    
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "Split the query into 2-3 sub-questions. Output only the questions, one per line."},
-                {"role": "user", "content": query}
-            ],
-            max_tokens=100,
-            temperature=0.1
-        )
+    Args:
+        query: The query to split
+        api_key: Optional API key, will use config default if not provided
         
-        content = response.choices[0].message.content
+    Returns:
+        List of sub-questions
+    """
+    try:
+        client = ChatClient(api_key, ModelType.SPLIT)
+        
+        messages = [
+            {
+                "role": "system", 
+                "content": "Split the query into 2-3 sub-questions. Output only the questions, one per line."
+            },
+            {"role": "user", "content": query}
+        ]
+        
+        content = client.create_completion(messages)
+        
         if content:
             questions = [line.strip() for line in content.split('\n') if line.strip()]
-            return questions[:3] if questions else [query]
+            return [query]+questions if questions else [query]
         return [query]
     
     except Exception as e:
@@ -48,69 +47,83 @@ def split_query(
         return [query]
 
 
-def query_to_database(question: str, pdfs: list[str]) -> List[dict]:
-    results = refer.get_reference_with_filter(question, included_pdfs=pdfs, limit=5)
+def query_to_database(question: str, pdfs: List[str]) -> List[Dict[str, Any]]:
+    """
+    Query the database for relevant documents
+    
+    Args:
+        question: The question to search for
+        pdfs: List of PDF names to include in search
+        
+    Returns:
+        List of relevant documents
+    """
+    results = refer.get_reference_with_filter(
+        question, 
+        included_pdfs=pdfs, 
+        limit=Config.DEFAULT_SEARCH_LIMIT
+    )
     return results if results else []
 
-if __name__ == "__main__":
-    # Test the import
-    print("Testing query module...")
-    
-    # Test split_query function
-    test_query = "What is the capital of France?"
-    print(f"Testing split_query with: '{test_query}'")
-    
-    try:
-        result = split_query(test_query)
-        print(f"Split result: {result}")
-    except ValueError as e:
-        print(f"Note: {e}")
-        print("This is expected if you haven't set up the API key.")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-    
-    print("\nModule loaded successfully!")
 
-def ans(
+def generate_answer(
     questions: List[str],
-    reference: List[dict],
-    model: str = "moonshotai/Kimi-K2-Instruct",
-    api_key: Optional[str] = None
+    reference: List[Dict[str, Any]],
+    api_key: Optional[str] = None,
+    language: str = "chinese"
 ) -> str:
+    """
+    Generate an answer based on questions and reference documents
     
-    if api_key is None:
-        api_key = os.getenv('siliconflow_api_key')
-        if not api_key:
-            raise ValueError("API key not found. Please set siliconflow_api_key environment variable.")
-    
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.siliconflow.cn/v1"
-    )
-    
-    # Format reference context
-    context = ""
-    for ref in reference:
-        context += f"Source: {ref.get('pdf_name', 'Unknown')} (Page {ref.get('page_number', 'N/A')})\n"
-        context += f"Content: {ref.get('text', '')}\n\n"
-    
-    # Combine questions into a single query
-    query = "\n".join([f"- {q}" for q in questions])
-    print("Starting answer generation...")
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that answers questions based on the provided context. Provide page numbers of the context in your answer. Use Chinese to answer."},
-                {"role": "user", "content": f"Questions:\n{query}\n\nContext:\n{context}"}
-            ],
-            max_tokens=5000,
-            temperature=0.7
-        )
+    Args:
+        questions: List of questions to answer
+        reference: List of reference documents
+        api_key: Optional API key, will use config default if not provided
+        language: Language for the response ("chinese" or "english")
         
-        content = response.choices[0].message.content
+    Returns:
+        Generated answer
+    """
+    try:
+        client = ChatClient(api_key, ModelType.CHAT)
+        
+        # Format reference context
+        context = ""
+        for ref in reference:
+            context += f"Source: {ref.get('pdf_name', 'Unknown')} (Page {ref.get('page_number', 'N/A')})\n"
+            context += f"Content: {ref.get('text', '')}\n\n"
+        
+        # Combine questions into a single query
+
+        
+        # Set system prompt based on language
+        if language.lower() == "chinese":
+            system_prompt = "You are a helpful assistant that answers questions based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Chinese to answer."
+        else:
+            system_prompt = "You are a helpful assistant that answers questions based on the provided context. Include page numbers from the context in your answer."
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Questions:\n{questions}\n\nContext:\n{context}"}
+        ]
+        
+        print("Starting answer generation...")
+        content = client.create_completion(messages)
         return content if content else "No answer generated."
     
     except Exception as e:
         print(f"Warning: Failed to generate answer: {e}")
         return "Failed to generate answer due to an error."
+
+
+# Keep original function name for backward compatibility
+def ans(
+    questions: List[str],
+    reference: List[Dict[str, Any]],
+    api_key: Optional[str] = None
+) -> str:
+    """
+    Legacy function name for backward compatibility
+    """
+    return generate_answer(questions, reference, api_key)
+

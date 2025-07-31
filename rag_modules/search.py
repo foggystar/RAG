@@ -141,7 +141,7 @@ def simple_search(
         if filter_expr:
             logger.info(f"Using filter: {filter_expr}")
         
-        # 构建搜索参数
+        # Build search parameters
         search_params = {
             "collection_name": collection_name,
             "data": query_vectors,
@@ -154,7 +154,7 @@ def simple_search(
         if output_fields:
             search_params["output_fields"] = output_fields
         
-        # 执行搜索
+        # Execute search
         results = client.search(**search_params)
         
         logger.info(f"Simple search completed, found {len(results)} result groups")

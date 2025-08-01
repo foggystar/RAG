@@ -6,7 +6,7 @@ import subprocess
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
-from colored_logger import get_colored_logger
+from .colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
 def pdf2md(

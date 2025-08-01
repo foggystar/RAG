@@ -8,52 +8,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
 
-
-def get_reference_with_filter(
+def get_reference(
         query: str,
-        collection_name: Optional[str] = None,
-        limit: Optional[int] = None,
-        included_pdfs: Optional[List[str]] = None,
-        database: Optional[str] = None
+        included_pdfs: List[str]
 ) -> List[Dict[str, Any]]:
-    """
-    Get reference documents with metadata filtering
     
-    Args:
-        query: Query text
-        collection_name: Collection name (uses config default if not provided)
-        limit: Result count limit (uses config default if not provided)
-        included_pdfs: List of PDF file names to include
-        database: Database file path (uses config default if not provided)
-    
-    Returns:
-        List of reranked reference documents
-    """
-    # Use config defaults if not specified
-    if collection_name is None:
-        collection_name = Config.DATABASE.collection_name
-    if limit is None:
-        limit = Config.DEFAULT_SEARCH_LIMIT
-    if database is None:
-        database = Config.DATABASE.path
-    
-    # Select search method based on filter conditions
-    if included_pdfs:
-        # Search only specified PDF files
-        if len(included_pdfs) == 1:
-            expr = f"pdf_name == '{included_pdfs[0]}'"
-        else:
-            # For multiple PDFs, use IN operator
-            pdf_list_str = "(" + ", ".join([f"'{pdf}'" for pdf in included_pdfs]) + ")"
-            expr = f"pdf_name in {pdf_list_str}"
-        results = search.search_with_metadata_filter([query], collection_name, limit, expr, database=database)
-    else:
-        # No filtering
-        results = search.search_with_metadata_filter([query], collection_name, limit, database=database)
+    search_results = search.search(query, included_pdfs)
 
     # Reranking processing
     rerank_results = []
-    if results and len(results) > 0:
+    if search_results and len(search_results) > 0:
         # Extract document text and metadata for reranking
         documents = []
         metadata_list = []

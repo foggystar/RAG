@@ -8,15 +8,10 @@ import requests
 from config import Config, ModelType
 from api_client import RerankClient
 
-
-
-
 def get_rerank(
     query: str,
     documents: List[str],
-    top_n: int = 5,
-    model: Optional[str] = None,
-    api_key: Optional[str] = None
+    top_n: int = Config.DEFAULT_SEARCH_LIMIT / 2,
 ) -> List[Dict[str, Any]]:
     """
     便捷函数：批量获取文档重排序结果
@@ -31,5 +26,5 @@ def get_rerank(
     Returns:
         重排序结果列表，包含文档索引和分数
     """
-    client = RerankClient(api_key)
-    return client.rerank(query, documents, top_n, model)
+    client = RerankClient()
+    return client.rerank(query, documents, top_n)

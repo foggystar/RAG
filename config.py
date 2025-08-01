@@ -31,7 +31,8 @@ class DatabaseConfig:
     """Database configuration settings"""
     path: str = "database/milvus_rag.db"
     collection_name: str = "rag_docs"
-
+    dimensions: int = 2048
+    chunk_size_limit: int = 2000
 
 class Config:
     """Centralized configuration manager"""

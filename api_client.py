@@ -6,8 +6,10 @@ Provides centralized client creation and management for OpenAI-compatible APIs.
 from typing import Optional, List, Dict, Any
 from openai import OpenAI
 import requests
-from config import Config, ModelType
+from config import Config, ModelType, DatabaseConfig
+from utils.colored_logger import get_colored_logger
 
+logger = get_colored_logger(__name__)
 
 class APIClientFactory:
     """Factory for creating and managing API clients"""
@@ -55,9 +57,9 @@ class RerankClient:
         self,
         query: str,
         documents: List[str],
-        top_n: int = 5,
+        top_n: int,
         model: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> List[str]:
         """
         批量获取文档重排序结果
         
@@ -73,10 +75,15 @@ class RerankClient:
         if not documents:
             return []
         
+        # 验证documents是字符串列表
+        if not all(isinstance(doc, str) for doc in documents):
+            raise ValueError(f"All documents must be strings, got: {[type(doc) for doc in documents]}")
+            
+        logger.info(f"Reranking {len(documents)} documents for query: {query}")
         url = f"{self.base_url}/rerank"
         
         payload = {
-            "model": model or self.model_config.name,
+            "model": Config.MODELS[ModelType.RERANK].name,
             "query": query,
             "documents": documents,
             "top_n": top_n
@@ -91,7 +98,7 @@ class RerankClient:
             response = requests.post(url, json=payload, headers=headers)
             response.raise_for_status()
             result = response.json()
-            return result.get('results', [])
+            return result
         except Exception as e:
             raise Exception(f"Rerank API request failed: {e}")
 
@@ -106,30 +113,13 @@ class EmbeddingClient:
         """Create embedding for a single text"""
         try:
             response = self.client.embeddings.create(
-                model=self.model_config.name,
-                input=text,
-                encoding_format="float",
-                dimensions=self.model_config.dimensions
+                model="Qwen/Qwen3-Embedding-4B",
+                input="To embedding: " + text,
+                dimensions=DatabaseConfig.dimensions
             )
             return response.data[0].embedding
         except Exception as e:
             raise Exception(f"Embedding API request failed: {e}")
-    
-    def create_batch_embeddings(self, texts: list[str]) -> list[list[float]]:
-        """Create embeddings for multiple texts"""
-        if not texts:
-            return []
-        
-        try:
-            response = self.client.embeddings.create(
-                model=self.model_config.name,
-                input=texts,
-                encoding_format="float",
-                dimensions=self.model_config.dimensions
-            )
-            return [data.embedding for data in response.data]
-        except Exception as e:
-            raise Exception(f"Batch embedding API request failed: {e}")
 
 
 class ChatClient:

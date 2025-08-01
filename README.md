@@ -94,14 +94,6 @@ uv sync
 export siliconflow_api_key="your_api_key_here"
 ```
 
-4. **启动 Milvus 数据库**
-```bash
-# 使用 Docker 启动 Milvus
-docker run -d --name milvus_standalone \
-  -p 19530:19530 -p 9091:9091 \
-  -v milvus_data:/var/lib/milvus \
-  milvusdb/milvus:v2.5.0-standalone
-```
 
 ### 基本使用
 
@@ -330,34 +322,9 @@ logger = get_colored_logger(__name__)
 logger.info("Debug information")
 ```
 
-## 🤝 贡献指南
-
-欢迎提交Issue和Pull Request！请遵循以下步骤：
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
-
 ## 🔗 相关链接
 
 - [Milvus 官方文档](https://milvus.io/docs)
 - [SiliconFlow API 文档](https://docs.siliconflow.cn/)
 - [Marker PDF](https://github.com/VikParuchuri/marker)
 - [FastAPI 文档](https://fastapi.tiangolo.com/)
-
-## 📞 联系方式
-
-如有问题或建议，请通过以下方式联系：
-
-- 创建 [GitHub Issue](https://github.com/your-repo/issues)
-- 邮箱: your-email@example.com
-
----
-
-⭐ 如果这个项目对你有帮助，请给它一个星标！

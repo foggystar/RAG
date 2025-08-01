@@ -34,7 +34,7 @@ def get_embedding(
 
     async def create_embeddings_async():
         client = EmbeddingClient(Config.get_api_key())
-        print(f"处理 {len(text)} 个文本...")
+        logger.info(f"处理 {len(text)} 个文本...")
         
         tasks = [
             create_single_embedding_with_monitoring(client, t, i) 

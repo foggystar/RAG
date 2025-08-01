@@ -7,6 +7,10 @@ import os
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# 设置彩色日志
+from utils.colored_logger import get_colored_logger
+logger = get_colored_logger(__name__)
+
 from config import Config, ModelType
 
 
@@ -51,7 +55,7 @@ def insert_data_with_metadata(
         
         # Check if collection exists, create with metadata if it doesn't
         if not client.has_collection(collection_name=collection_name):
-            print(f"Collection '{collection_name}' does not exist, creating new collection...")
+            logger.info(f"Collection '{collection_name}' does not exist, creating new collection...")
             # Create collection with metadata for MilvusClient
             client.create_collection(
                 collection_name=collection_name,
@@ -60,12 +64,12 @@ def insert_data_with_metadata(
                 primary_field_name="id",
                 vector_field_name="vector"
             )
-            print(f"Collection '{collection_name}' created successfully")
+            logger.info(f"Collection '{collection_name}' created successfully")
         
         # Get embedding vectors
-        print(f"Generating embedding vectors for {len(texts)} texts...")
+        logger.info(f"Generating embedding vectors for {len(texts)} texts...")
         embeddings = get_batch_embeddings_large_scale(texts)
-        print(f"Embedding vector generation completed")
+        logger.info(f"Embedding vector generation completed")
         
         # Prepare data for insertion - adapt to MilvusClient format
         data = []
@@ -80,12 +84,12 @@ def insert_data_with_metadata(
             })
         
         # Execute insertion operation
-        print(f"Inserting {len(data)} records into collection '{collection_name}'...")
+        logger.info(f"Inserting {len(data)} records into collection '{collection_name}'...")
         res = client.insert(collection_name=collection_name, data=data)
         
-        print(f"Data insertion completed, inserted {len(texts)} records")
+        logger.info(f"Data insertion completed, inserted {len(texts)} records")
         return True
         
     except Exception as e:
-        print(f"Failed to insert data: {e}")
+        logger.error(f"Failed to insert data: {e}")
         return False

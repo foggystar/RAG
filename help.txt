@@ -1,0 +1,1368 @@
+Usage: marker_single [OPTIONS] FPATH
+
+  Convert a single PDF to markdown.
+
+Options:
+  --llm_service TEXT              LLM service to use - should be full import
+                                  path, like
+                                  marker.services.gemini.GoogleGeminiService
+  --converter_cls TEXT            Converter class to use.  Defaults to PDF
+                                  converter.
+  --page_range TEXT               Page range to convert, specify comma
+                                  separated page numbers or ranges.  Example:
+                                  0,5-10,20
+  --disable_image_extraction      Disable image extraction.
+  --disable_multiprocessing       Disable multiprocessing.
+  --config_json TEXT              Path to JSON file with additional
+                                  configuration.
+  --processors TEXT               Comma separated list of processors to use.
+                                  Must use full module path.
+  --output_format [markdown|json|html|chunks]
+                                  Format to output results in.
+  -d, --debug                     Enable debug mode.
+  --output_dir PATH               Directory to save output.
+  --lowres_image_dpi INTEGER      DPI setting for low-resolution page images
+                                  used for Layout and Line Detection. Default
+                                  is 96. (Applies to: DocumentBuilder)
+  --highres_image_dpi INTEGER     DPI setting for high-resolution page images
+                                  used for OCR. Default is 192. (Applies to:
+                                  DocumentBuilder)
+  --disable_ocr                   Disable OCR processing. Default is False.
+                                  (Applies to: DocumentBuilder)
+  --layout_batch_size INTEGER     The batch size to use for the layout model.
+                                  Default is None, which will use the default
+                                  batch size for the model. (Applies to:
+                                  LayoutBuilder)
+  --force_layout_block TEXT       Skip layout and force every page to be
+                                  treated as a specific block type. Default is
+                                  None. (Applies to: LayoutBuilder)
+  --disable_tqdm                  Disable tqdm progress bars. Default is
+                                  False. (Applies to: LayoutBuilder,
+                                  LineBuilder, OcrBuilder, EquationProcessor,
+                                  LLMComplexRegionProcessor,
+                                  LLMEquationProcessor, LLMFormProcessor,
+                                  LLMHandwritingProcessor,
+                                  LLMImageDescriptionProcessor,
+                                  LLMMathBlockProcessor,
+                                  LLMSimpleBlockMetaProcessor,
+                                  LLMPageCorrectionProcessor,
+                                  LLMSectionHeaderProcessor,
+                                  LLMTableProcessor, LLMTableMergeProcessor,
+                                  TableProcessor, DocumentExtractor,
+                                  PageExtractor)
+  --max_expand_frac FLOAT         The maximum fraction to expand the layout
+                                  box bounds by Default is 0.05. (Applies to:
+                                  LayoutBuilder)
+  --detection_batch_size INTEGER  The batch size to use for the detection
+                                  model. Default is None, which will use the
+                                  default batch size for the model. (Applies
+                                  to: LineBuilder, TableProcessor)
+  --ocr_error_batch_size INTEGER  The batch size to use for the ocr error
+                                  detection model. Default is None, which will
+                                  use the default batch size for the model.
+                                  (Applies to: LineBuilder)
+  --enable_table_ocr              Whether to skip OCR on tables.  The
+                                  TableProcessor will re-OCR them.  Only
+                                  enable if the TableProcessor is not running.
+                                  Default is False. (Applies to: LineBuilder)
+  --format_lines                  Enable good provider lines to be checked and
+                                  fixed by the OCR model Default is False.
+                                  (Applies to: LineBuilder, TableProcessor)
+  --layout_coverage_min_lines INTEGER
+                                  The minimum number of PdfProvider lines that
+                                  must be covered by the layout model to
+                                  consider the lines from the PdfProvider
+                                  valid. Default is 1. (Applies to:
+                                  LineBuilder)
+  --layout_coverage_threshold FLOAT
+                                  The minimum coverage ratio required for the
+                                  layout model to consider the lines from the
+                                  PdfProvider valid. Default is 0.25. (Applies
+                                  to: LineBuilder)
+  --min_document_ocr_threshold FLOAT
+                                  If less pages than this threshold are good,
+                                  OCR will happen in the document.  Otherwise
+                                  it will not. Default is 0.85. (Applies to:
+                                  LineBuilder)
+  --provider_line_detected_line_min_overlap_pct FLOAT
+                                  The percentage of a provider line that has
+                                  to be covered by a detected line Default is
+                                  0.1. (Applies to: LineBuilder)
+  --line_vertical_merge_threshold INTEGER
+                                  The maximum pixel distance between y1s for
+                                  two lines to be merged Default is 8.
+                                  (Applies to: LineBuilder)
+  --keep_chars                    Keep individual characters. Default is
+                                  False. (Applies to: LineBuilder, OcrBuilder,
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --recognition_batch_size INTEGER
+                                  The batch size to use for the recognition
+                                  model. Default is None, which will use the
+                                  default batch size for the model. (Applies
+                                  to: OcrBuilder, TableProcessor)
+  --ocr_task_name TEXT            The OCR mode to use, see surya for details.
+                                  Set to 'ocr_without_boxes' for potentially
+                                  better performance, at the expense of
+                                  formatting. Default is ocr_with_boxes.
+                                  (Applies to: OcrBuilder)
+  --disable_ocr_math              Disable inline math recognition in OCR
+                                  Default is False. (Applies to: OcrBuilder)
+  --drop_repeated_text            Drop repeated text in OCR results. Default
+                                  is False. (Applies to: OcrBuilder,
+                                  EquationProcessor, TableProcessor)
+  --gap_threshold FLOAT           The minimum gap between blocks to consider
+                                  them part of the same group. Default is
+                                  0.05. (Applies to: StructureBuilder)
+  --list_gap_threshold FLOAT      The minimum gap between list items to
+                                  consider them part of the same group.
+                                  Default is 0.1. (Applies to:
+                                  StructureBuilder)
+  --full_page_block_intersection_threshold FLOAT
+                                  Threshold to detect blank pages at Default
+                                  is 0.8. (Applies to: BlankPageProcessor)
+  --filter_blank_pages            Remove blank pages detected as images.
+                                  Default is False. (Applies to:
+                                  BlankPageProcessor)
+  --block_relabel_str TEXT        Comma-separated relabeling rules in the
+                                  format '<original_label>:<new_label>:<confid
+                                  ence_threshold>'. Each rule defines how
+                                  blocks of a certain type should be relabeled
+                                  when the confidence exceeds the threshold.
+                                  Example:
+                                  'Table:Picture:0.85,Form:Picture:0.9'
+                                  Default is . (Applies to:
+                                  BlockRelabelProcessor)
+  --min_x_indent FLOAT            The minimum horizontal indentation required
+                                  to consider a block as part of a blockquote.
+                                  Expressed as a percentage of the block
+                                  width. Default is 0.1. (Applies to:
+                                  BlockquoteProcessor, ListProcessor)
+  --x_start_tolerance FLOAT       The maximum allowable difference between the
+                                  starting x-coordinates of consecutive blocks
+                                  to consider them aligned. Expressed as a
+                                  percentage of the block width. Default is
+                                  0.01. (Applies to: BlockquoteProcessor)
+  --x_end_tolerance FLOAT         The maximum allowable difference between the
+                                  ending x-coordinates of consecutive blocks
+                                  to consider them aligned. Expressed as a
+                                  percentage of the block width. Default is
+                                  0.01. (Applies to: BlockquoteProcessor)
+  --debug_data_folder TEXT        The folder to dump debug data to. Default is
+                                  debug_data. (Applies to: DebugProcessor)
+  --debug_layout_images           Whether to dump layout debug images. Default
+                                  is False. (Applies to: DebugProcessor)
+  --debug_pdf_images              Whether to dump PDF debug images. Default is
+                                  False. (Applies to: DebugProcessor)
+  --debug_json                    Whether to dump block debug data. Default is
+                                  False. (Applies to: DebugProcessor)
+  --model_max_length INTEGER      The maximum number of tokens to allow for
+                                  the Recognition model. Default is 1024.
+                                  (Applies to: EquationProcessor)
+  --equation_batch_size INTEGER   The batch size to use for the recognition
+                                  model while processing equations. Default is
+                                  None, which will use the default batch size
+                                  for the model. (Applies to:
+                                  EquationProcessor)
+  --common_element_threshold FLOAT
+                                  The minimum ratio of pages a text block must
+                                  appear on to be considered a common element.
+                                  Blocks that meet or exceed this threshold
+                                  are marked as common elements. Default is
+                                  0.2. (Applies to: IgnoreTextProcessor)
+  --common_element_min_blocks INTEGER
+                                  The minimum number of occurrences of a text
+                                  block within a document to consider it a
+                                  common element. This ensures that rare
+                                  blocks are not mistakenly flagged. Default
+                                  is 3. (Applies to: IgnoreTextProcessor)
+  --max_streak INTEGER            The maximum number of consecutive
+                                  occurrences of a text block allowed before
+                                  it is classified as a common element. Helps
+                                  to identify patterns like repeated headers
+                                  or footers. Default is 3. (Applies to:
+                                  IgnoreTextProcessor)
+  --text_match_threshold INTEGER  The minimum fuzzy match score (0-100)
+                                  required to classify a text block as similar
+                                  to a common element. Higher values enforce
+                                  stricter matching. Default is 90. (Applies
+                                  to: IgnoreTextProcessor)
+  --min_merge_pct FLOAT           The minimum percentage of intersection area
+                                  to consider merging. Default is 0.015.
+                                  (Applies to: LineMergeProcessor)
+  --block_expand_threshold FLOAT  The percentage of the block width to expand
+                                  the bounding box. Default is 0.05. (Applies
+                                  to: LineMergeProcessor)
+  --min_merge_ydist FLOAT         The minimum y distance between lines to
+                                  consider merging. Default is 5. (Applies to:
+                                  LineMergeProcessor)
+  --intersection_pct_threshold FLOAT
+                                  The total amount of intersection area
+                                  concentrated in the max intersection block.
+                                  Default is 0.5. (Applies to:
+                                  LineMergeProcessor)
+  --vertical_overlap_pct_threshold FLOAT
+                                  The minimum percentage of vertical overlap
+                                  to consider merging. Default is 0.8.
+                                  (Applies to: LineMergeProcessor)
+  --use_llm                       Whether to use LLMs to improve accuracy.
+                                  Default is False. (Applies to:
+                                  LineMergeProcessor,
+                                  LLMComplexRegionProcessor,
+                                  LLMEquationProcessor, LLMFormProcessor,
+                                  LLMHandwritingProcessor,
+                                  LLMImageDescriptionProcessor,
+                                  LLMMathBlockProcessor,
+                                  LLMSimpleBlockMetaProcessor,
+                                  LLMPageCorrectionProcessor,
+                                  LLMSectionHeaderProcessor,
+                                  LLMTableProcessor, LLMTableMergeProcessor,
+                                  ExtractionConverter, PdfConverter,
+                                  OCRConverter, TableConverter)
+  --strip_numbers_threshold FLOAT
+                                  The fraction of lines or tokens in a block
+                                  that must be numeric to consider them as
+                                  line numbers. Default is 0.6. (Applies to:
+                                  LineNumbersProcessor)
+  --min_lines_in_block INTEGER    The minimum number of lines required in a
+                                  block for it to be considered during
+                                  processing. Ensures that small blocks are
+                                  ignored as they are unlikely to contain
+                                  meaningful line numbers. Default is 4.
+                                  (Applies to: LineNumbersProcessor)
+  --min_line_length INTEGER       The minimum length of a line (in characters)
+                                  to consider it significant when checking for
+                                  numeric prefixes or suffixes. Prevents false
+                                  positives for short lines. Default is 10.
+                                  (Applies to: LineNumbersProcessor)
+  --min_line_number_span_ratio FLOAT
+                                  The minimum ratio of detected line number
+                                  spans to total lines required to treat them
+                                  as line numbers. Default is 0.6. (Applies
+                                  to: LineNumbersProcessor)
+  --max_concurrency INTEGER       The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+                                  (Applies to: LLMComplexRegionProcessor,
+                                  LLMEquationProcessor, LLMFormProcessor,
+                                  LLMHandwritingProcessor,
+                                  LLMImageDescriptionProcessor,
+                                  LLMMathBlockProcessor,
+                                  LLMSimpleBlockMetaProcessor,
+                                  LLMPageCorrectionProcessor,
+                                  LLMSectionHeaderProcessor,
+                                  LLMTableProcessor, LLMTableMergeProcessor,
+                                  DocumentExtractor, PageExtractor)
+  --image_expansion_ratio FLOAT   The ratio to expand the image by when
+                                  cropping. Default is 0.01. (Applies to:
+                                  LLMComplexRegionProcessor,
+                                  LLMEquationProcessor, LLMFormProcessor,
+                                  LLMHandwritingProcessor,
+                                  LLMImageDescriptionProcessor,
+                                  LLMMathBlockProcessor,
+                                  LLMSimpleBlockMetaProcessor,
+                                  LLMPageCorrectionProcessor,
+                                  LLMSectionHeaderProcessor,
+                                  LLMTableProcessor, LLMTableMergeProcessor)
+  --min_equation_height FLOAT     The minimum ratio between equation height
+                                  and page height to consider for processing.
+                                  Default is 0.06. (Applies to:
+                                  LLMEquationProcessor)
+  --redo_inline_math              Whether to redo inline math blocks. Default
+                                  is False. (Applies to: LLMEquationProcessor,
+                                  LLMMathBlockProcessor)
+  --equation_latex_prompt TEXT    The prompt to use for generating LaTeX from
+                                  equations. Default is a string containing
+                                  the Gemini prompt. (Applies to:
+                                  LLMEquationProcessor)
+  --handwriting_generation_prompt TEXT
+                                  The prompt to use for OCRing handwriting.
+                                  Default is a string containing the Gemini
+                                  prompt. (Applies to:
+                                  LLMHandwritingProcessor)
+  --extract_images BOOLEAN        Extract images from the document. Default is
+                                  True. (Applies to:
+                                  LLMImageDescriptionProcessor, ChunkRenderer,
+                                  JSONRenderer, ExtractionRenderer,
+                                  HTMLRenderer, MarkdownRenderer,
+                                  OCRJSONRenderer)
+  --image_description_prompt TEXT
+                                  The prompt to use for generating image
+                                  descriptions. Default is a string containing
+                                  the Gemini prompt. (Applies to:
+                                  LLMImageDescriptionProcessor)
+  --inlinemath_min_ratio FLOAT    If more than this ratio of blocks are
+                                  inlinemath blocks, assume everything has
+                                  math. Default is 0.4. (Applies to:
+                                  LLMMathBlockProcessor)
+  --block_correction_prompt TEXT  The user prompt to guide the block
+                                  correction process. Default is None.
+                                  (Applies to: LLMPageCorrectionProcessor)
+  --max_rows_per_batch INTEGER    If the table has more rows than this, chunk
+                                  the table. (LLMs can be inaccurate with a
+                                  lot of rows) Default is 60. (Applies to:
+                                  LLMTableProcessor)
+  --max_table_rows INTEGER        The maximum number of rows in a table to
+                                  process with the LLM processor.  Beyond this
+                                  will be skipped. Default is 175. (Applies
+                                  to: LLMTableProcessor)
+  --table_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0. (Applies to:
+                                  LLMTableProcessor)
+  --rotation_max_wh_ratio FLOAT   The maximum width/height ratio for table
+                                  cells for a table to be considered rotated.
+                                  Default is 0.6. (Applies to:
+                                  LLMTableProcessor)
+  --table_rewriting_prompt TEXT   The prompt to use for rewriting text.
+                                  Default is a string containing the Gemini
+                                  rewriting prompt. (Applies to:
+                                  LLMTableProcessor)
+  --table_height_threshold FLOAT  The minimum height ratio relative to the
+                                  page for the first table in a pair to be
+                                  considered for merging. Default is 0.6.
+                                  (Applies to: LLMTableMergeProcessor)
+  --table_start_threshold FLOAT   The maximum percentage down the page the
+                                  second table can start to be considered for
+                                  merging. Default is 0.2. (Applies to:
+                                  LLMTableMergeProcessor)
+  --vertical_table_height_threshold FLOAT
+                                  The height tolerance for 2 adjacent tables
+                                  to be merged into one. Default is 0.25.
+                                  (Applies to: LLMTableMergeProcessor)
+  --vertical_table_distance_threshold INTEGER
+                                  The maximum distance between table edges for
+                                  adjacency. Default is 20. (Applies to:
+                                  LLMTableMergeProcessor)
+  --horizontal_table_width_threshold FLOAT
+                                  The width tolerance for 2 adjacent tables to
+                                  be merged into one. Default is 0.25.
+                                  (Applies to: LLMTableMergeProcessor)
+  --horizontal_table_distance_threshold INTEGER
+                                  The maximum distance between table edges for
+                                  adjacency. Default is 10. (Applies to:
+                                  LLMTableMergeProcessor)
+  --column_gap_threshold INTEGER  The maximum gap between columns to merge
+                                  tables Default is 50. (Applies to:
+                                  LLMTableMergeProcessor)
+  --table_merge_prompt TEXT       The prompt to use for rewriting text.
+                                  Default is a string containing the Gemini
+                                  rewriting prompt. (Applies to:
+                                  LLMTableMergeProcessor)
+  --level_count INTEGER           The number of levels to use for headings.
+                                  Default is 4. (Applies to:
+                                  SectionHeaderProcessor)
+  --merge_threshold FLOAT         The minimum gap between headings to consider
+                                  them part of the same group. Default is
+                                  0.25. (Applies to: SectionHeaderProcessor)
+  --default_level INTEGER         The default heading level to use if no
+                                  heading level is detected. Default is 2.
+                                  (Applies to: SectionHeaderProcessor)
+  --height_tolerance FLOAT        The minimum height of a heading to consider
+                                  it a heading. Default is 0.99. (Applies to:
+                                  SectionHeaderProcessor)
+  --detect_boxes                  Whether to detect boxes for the table
+                                  recognition model. Default is False.
+                                  (Applies to: TableProcessor)
+  --table_rec_batch_size INTEGER  The batch size to use for the table
+                                  recognition model. Default is None, which
+                                  will use the default batch size for the
+                                  model. (Applies to: TableProcessor)
+  --row_split_threshold FLOAT     The percentage of rows that need to be split
+                                  across the table before row splitting is
+                                  active. Default is 0.5. (Applies to:
+                                  TableProcessor)
+  --pdftext_workers INTEGER       The number of workers to use for pdftext.
+                                  Default is 1. (Applies to: TableProcessor,
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --column_gap_ratio FLOAT        The minimum ratio of the page width to the
+                                  column gap to consider a column break.
+                                  Default is 0.02. (Applies to: TextProcessor)
+  --pattern TEXT                  Default is {\d+\}-{48}\n\n. (Applies to:
+                                  ExtractionConverter)
+  --existing_markdown TEXT        Markdown that was already converted for
+                                  extraction. Default is None. (Applies to:
+                                  ExtractionConverter)
+  --flatten_pdf BOOLEAN           Whether to flatten the PDF structure.
+                                  Default is True. (Applies to:
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --force_ocr                     Whether to force OCR on the whole document.
+                                  Default is False. (Applies to:
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --ocr_space_threshold FLOAT     The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7. (Applies
+                                  to: DocumentProvider, PdfProvider,
+                                  EpubProvider, HTMLProvider,
+                                  PowerPointProvider, SpreadSheetProvider)
+  --ocr_newline_threshold FLOAT   The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+                                  (Applies to: DocumentProvider, PdfProvider,
+                                  EpubProvider, HTMLProvider,
+                                  PowerPointProvider, SpreadSheetProvider)
+  --ocr_alphanum_threshold FLOAT  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+                                  (Applies to: DocumentProvider, PdfProvider,
+                                  EpubProvider, HTMLProvider,
+                                  PowerPointProvider, SpreadSheetProvider)
+  --image_threshold FLOAT         The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65. (Applies to:
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --strip_existing_ocr            Whether to strip existing OCR text from the
+                                  PDF. Default is False. (Applies to:
+                                  DocumentProvider, PdfProvider, EpubProvider,
+                                  HTMLProvider, PowerPointProvider,
+                                  SpreadSheetProvider)
+  --disable_links                 Whether to disable links. Default is False.
+                                  (Applies to: DocumentProvider, PdfProvider,
+                                  EpubProvider, HTMLProvider,
+                                  PowerPointProvider, SpreadSheetProvider)
+  --image_count INTEGER           Default is 1. (Applies to: ImageProvider)
+  --include_slide_number          Default is False. (Applies to:
+                                  PowerPointProvider)
+  --keep_pageheader_in_output     Keep the page header in the output HTML.
+                                  Default is False. (Applies to:
+                                  ChunkRenderer, JSONRenderer,
+                                  ExtractionRenderer, HTMLRenderer,
+                                  MarkdownRenderer, OCRJSONRenderer)
+  --keep_pagefooter_in_output     Keep the page footer in the output HTML.
+                                  Default is False. (Applies to:
+                                  ChunkRenderer, JSONRenderer,
+                                  ExtractionRenderer, HTMLRenderer,
+                                  MarkdownRenderer, OCRJSONRenderer)
+  --paginate_output               Whether to paginate the output. Default is
+                                  False. (Applies to: HTMLRenderer,
+                                  MarkdownRenderer)
+  --page_separator TEXT           The separator to use between pages. Default
+                                  is '-' * 48. (Applies to: MarkdownRenderer)
+  --timeout INTEGER               The timeout to use for the service. Default
+                                  is 30. (Applies to: AzureOpenAIService,
+                                  ClaudeService, GoogleGeminiService,
+                                  OllamaService, OpenAIService,
+                                  GoogleVertexService)
+  --max_retries INTEGER           The maximum number of retries to use for the
+                                  service. Default is 2. (Applies to:
+                                  AzureOpenAIService, ClaudeService,
+                                  GoogleGeminiService, OllamaService,
+                                  OpenAIService, GoogleVertexService)
+  --retry_wait_time INTEGER       The wait time between retries. Default is 3.
+                                  (Applies to: AzureOpenAIService,
+                                  ClaudeService, GoogleGeminiService,
+                                  OllamaService, OpenAIService,
+                                  GoogleVertexService)
+  --azure_endpoint TEXT           The Azure OpenAI endpoint URL. No trailing
+                                  slash. Default is None. (Applies to:
+                                  AzureOpenAIService)
+  --azure_api_key TEXT            The API key to use for the Azure OpenAI
+                                  service. Default is None. (Applies to:
+                                  AzureOpenAIService)
+  --azure_api_version TEXT        The Azure OpenAI API version to use. Default
+                                  is None. (Applies to: AzureOpenAIService)
+  --deployment_name TEXT          The deployment name for the Azure OpenAI
+                                  model. Default is None. (Applies to:
+                                  AzureOpenAIService)
+  --claude_model_name TEXT        The name of the Google model to use for the
+                                  service. Default is
+                                  claude-3-7-sonnet-20250219. (Applies to:
+                                  ClaudeService)
+  --claude_api_key TEXT           The Claude API key to use for the service.
+                                  Default is None. (Applies to: ClaudeService)
+  --max_claude_tokens INTEGER     The maximum number of tokens to use for a
+                                  single Claude request. Default is 8192.
+                                  (Applies to: ClaudeService)
+  --gemini_model_name TEXT        The name of the Google model to use for the
+                                  service. Default is gemini-2.0-flash.
+                                  (Applies to: GoogleGeminiService,
+                                  GoogleVertexService)
+  --gemini_api_key TEXT           The Google API key to use for the service.
+                                  Default is None. (Applies to:
+                                  GoogleGeminiService)
+  --ollama_base_url TEXT          The base url to use for ollama.  No trailing
+                                  slash. Default is http://localhost:11434.
+                                  (Applies to: OllamaService)
+  --ollama_model TEXT             The model name to use for ollama. Default is
+                                  llama3.2-vision. (Applies to: OllamaService)
+  --openai_base_url TEXT          The base url to use for OpenAI-like models.
+                                  No trailing slash. Default is
+                                  https://api.openai.com/v1. (Applies to:
+                                  OpenAIService)
+  --openai_model TEXT             The model name to use for OpenAI-like model.
+                                  Default is gpt-4o-mini. (Applies to:
+                                  OpenAIService)
+  --openai_api_key TEXT           The API key to use for the OpenAI-like
+                                  service. Default is None. (Applies to:
+                                  OpenAIService)
+  --openai_image_format TEXT      The image format to use for the OpenAI-like
+                                  service. Use 'png' for better compatability
+                                  Default is webp. (Applies to: OpenAIService)
+  --vertex_project_id TEXT        Google Cloud Project ID for Vertex AI.
+                                  Default is None. (Applies to:
+                                  GoogleVertexService)
+  --vertex_location TEXT          Google Cloud Location for Vertex AI. Default
+                                  is us-central1. (Applies to:
+                                  GoogleVertexService)
+  --vertex_dedicated              Whether to use a dedicated Vertex AI
+                                  instance. Default is False. (Applies to:
+                                  GoogleVertexService)
+  --page_schema TEXT              The JSON schema to be extracted from the
+                                  page. Default is . (Applies to:
+                                  DocumentExtractor, PageExtractor)
+  --extraction_page_chunk_size INTEGER
+                                  The number of pages to chunk together for
+                                  extraction. Default is 3. (Applies to:
+                                  PageExtractor)
+  --DocumentBuilder_lowres_image_dpi INTEGER
+                                  DPI setting for low-resolution page images
+                                  used for Layout and Line Detection. Default
+                                  is 96.
+  --DocumentBuilder_highres_image_dpi INTEGER
+                                  DPI setting for high-resolution page images
+                                  used for OCR. Default is 192.
+  --DocumentBuilder_disable_ocr   Disable OCR processing. Default is False.
+  --LayoutBuilder_layout_batch_size INTEGER
+                                  The batch size to use for the layout model.
+                                  Default is None, which will use the default
+                                  batch size for the model.
+  --LayoutBuilder_force_layout_block TEXT
+                                  Skip layout and force every page to be
+                                  treated as a specific block type. Default is
+                                  None.
+  --LayoutBuilder_disable_tqdm    Disable tqdm progress bars. Default is
+                                  False.
+  --LayoutBuilder_max_expand_frac FLOAT
+                                  The maximum fraction to expand the layout
+                                  box bounds by Default is 0.05.
+  --LineBuilder_detection_batch_size INTEGER
+                                  The batch size to use for the detection
+                                  model. Default is None, which will use the
+                                  default batch size for the model.
+  --LineBuilder_ocr_error_batch_size INTEGER
+                                  The batch size to use for the ocr error
+                                  detection model. Default is None, which will
+                                  use the default batch size for the model.
+  --LineBuilder_enable_table_ocr  Whether to skip OCR on tables.  The
+                                  TableProcessor will re-OCR them.  Only
+                                  enable if the TableProcessor is not running.
+                                  Default is False.
+  --LineBuilder_format_lines      Enable good provider lines to be checked and
+                                  fixed by the OCR model Default is False.
+  --LineBuilder_layout_coverage_min_lines INTEGER
+                                  The minimum number of PdfProvider lines that
+                                  must be covered by the layout model to
+                                  consider the lines from the PdfProvider
+                                  valid. Default is 1.
+  --LineBuilder_layout_coverage_threshold FLOAT
+                                  The minimum coverage ratio required for the
+                                  layout model to consider the lines from the
+                                  PdfProvider valid. Default is 0.25.
+  --LineBuilder_min_document_ocr_threshold FLOAT
+                                  If less pages than this threshold are good,
+                                  OCR will happen in the document.  Otherwise
+                                  it will not. Default is 0.85.
+  --LineBuilder_provider_line_detected_line_min_overlap_pct FLOAT
+                                  The percentage of a provider line that has
+                                  to be covered by a detected line Default is
+                                  0.1.
+  --LineBuilder_line_vertical_merge_threshold INTEGER
+                                  The maximum pixel distance between y1s for
+                                  two lines to be merged Default is 8.
+  --LineBuilder_disable_tqdm      Disable tqdm progress bars. Default is
+                                  False.
+  --LineBuilder_keep_chars        Keep individual characters. Default is
+                                  False.
+  --OcrBuilder_recognition_batch_size INTEGER
+                                  The batch size to use for the recognition
+                                  model. Default is None, which will use the
+                                  default batch size for the model.
+  --OcrBuilder_disable_tqdm       Disable tqdm progress bars. Default is
+                                  False.
+  --OcrBuilder_ocr_task_name TEXT
+                                  The OCR mode to use, see surya for details.
+                                  Set to 'ocr_without_boxes' for potentially
+                                  better performance, at the expense of
+                                  formatting. Default is ocr_with_boxes.
+  --OcrBuilder_keep_chars         Keep individual characters. Default is
+                                  False.
+  --OcrBuilder_disable_ocr_math   Disable inline math recognition in OCR
+                                  Default is False.
+  --OcrBuilder_drop_repeated_text
+                                  Drop repeated text in OCR results. Default
+                                  is False.
+  --StructureBuilder_gap_threshold FLOAT
+                                  The minimum gap between blocks to consider
+                                  them part of the same group. Default is
+                                  0.05.
+  --StructureBuilder_list_gap_threshold FLOAT
+                                  The minimum gap between list items to
+                                  consider them part of the same group.
+                                  Default is 0.1.
+  --BlankPageProcessor_full_page_block_intersection_threshold FLOAT
+                                  Threshold to detect blank pages at Default
+                                  is 0.8.
+  --BlankPageProcessor_filter_blank_pages
+                                  Remove blank pages detected as images.
+                                  Default is False.
+  --BlockRelabelProcessor_block_relabel_str TEXT
+                                  Comma-separated relabeling rules in the
+                                  format '<original_label>:<new_label>:<confid
+                                  ence_threshold>'. Each rule defines how
+                                  blocks of a certain type should be relabeled
+                                  when the confidence exceeds the threshold.
+                                  Example:
+                                  'Table:Picture:0.85,Form:Picture:0.9'
+                                  Default is .
+  --BlockquoteProcessor_min_x_indent FLOAT
+                                  The minimum horizontal indentation required
+                                  to consider a block as part of a blockquote.
+                                  Expressed as a percentage of the block
+                                  width. Default is 0.1.
+  --BlockquoteProcessor_x_start_tolerance FLOAT
+                                  The maximum allowable difference between the
+                                  starting x-coordinates of consecutive blocks
+                                  to consider them aligned. Expressed as a
+                                  percentage of the block width. Default is
+                                  0.01.
+  --BlockquoteProcessor_x_end_tolerance FLOAT
+                                  The maximum allowable difference between the
+                                  ending x-coordinates of consecutive blocks
+                                  to consider them aligned. Expressed as a
+                                  percentage of the block width. Default is
+                                  0.01.
+  --DebugProcessor_debug_data_folder TEXT
+                                  The folder to dump debug data to. Default is
+                                  debug_data.
+  --DebugProcessor_debug_layout_images
+                                  Whether to dump layout debug images. Default
+                                  is False.
+  --DebugProcessor_debug_pdf_images
+                                  Whether to dump PDF debug images. Default is
+                                  False.
+  --DebugProcessor_debug_json     Whether to dump block debug data. Default is
+                                  False.
+  --EquationProcessor_model_max_length INTEGER
+                                  The maximum number of tokens to allow for
+                                  the Recognition model. Default is 1024.
+  --EquationProcessor_equation_batch_size INTEGER
+                                  The batch size to use for the recognition
+                                  model while processing equations. Default is
+                                  None, which will use the default batch size
+                                  for the model.
+  --EquationProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --EquationProcessor_drop_repeated_text
+                                  Drop repeated text in OCR results. Default
+                                  is False.
+  --IgnoreTextProcessor_common_element_threshold FLOAT
+                                  The minimum ratio of pages a text block must
+                                  appear on to be considered a common element.
+                                  Blocks that meet or exceed this threshold
+                                  are marked as common elements. Default is
+                                  0.2.
+  --IgnoreTextProcessor_common_element_min_blocks INTEGER
+                                  The minimum number of occurrences of a text
+                                  block within a document to consider it a
+                                  common element. This ensures that rare
+                                  blocks are not mistakenly flagged. Default
+                                  is 3.
+  --IgnoreTextProcessor_max_streak INTEGER
+                                  The maximum number of consecutive
+                                  occurrences of a text block allowed before
+                                  it is classified as a common element. Helps
+                                  to identify patterns like repeated headers
+                                  or footers. Default is 3.
+  --IgnoreTextProcessor_text_match_threshold INTEGER
+                                  The minimum fuzzy match score (0-100)
+                                  required to classify a text block as similar
+                                  to a common element. Higher values enforce
+                                  stricter matching. Default is 90.
+  --LineMergeProcessor_min_merge_pct FLOAT
+                                  The minimum percentage of intersection area
+                                  to consider merging. Default is 0.015.
+  --LineMergeProcessor_block_expand_threshold FLOAT
+                                  The percentage of the block width to expand
+                                  the bounding box. Default is 0.05.
+  --LineMergeProcessor_min_merge_ydist FLOAT
+                                  The minimum y distance between lines to
+                                  consider merging. Default is 5.
+  --LineMergeProcessor_intersection_pct_threshold FLOAT
+                                  The total amount of intersection area
+                                  concentrated in the max intersection block.
+                                  Default is 0.5.
+  --LineMergeProcessor_vertical_overlap_pct_threshold FLOAT
+                                  The minimum percentage of vertical overlap
+                                  to consider merging. Default is 0.8.
+  --LineMergeProcessor_use_llm    Whether to use LLMs to improve accuracy.
+                                  Default is False.
+  --LineNumbersProcessor_strip_numbers_threshold FLOAT
+                                  The fraction of lines or tokens in a block
+                                  that must be numeric to consider them as
+                                  line numbers. Default is 0.6.
+  --LineNumbersProcessor_min_lines_in_block INTEGER
+                                  The minimum number of lines required in a
+                                  block for it to be considered during
+                                  processing. Ensures that small blocks are
+                                  ignored as they are unlikely to contain
+                                  meaningful line numbers. Default is 4.
+  --LineNumbersProcessor_min_line_length INTEGER
+                                  The minimum length of a line (in characters)
+                                  to consider it significant when checking for
+                                  numeric prefixes or suffixes. Prevents false
+                                  positives for short lines. Default is 10.
+  --LineNumbersProcessor_min_line_number_span_ratio FLOAT
+                                  The minimum ratio of detected line number
+                                  spans to total lines required to treat them
+                                  as line numbers. Default is 0.6.
+  --ListProcessor_min_x_indent FLOAT
+                                  The minimum horizontal indentation required
+                                  to consider a block as a nested list item.
+                                  This is expressed as a percentage of the
+                                  page width and is used to determine
+                                  hierarchical relationships within a list.
+                                  Default is 0.01.
+  --LLMComplexRegionProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMComplexRegionProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMComplexRegionProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMComplexRegionProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMEquationProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMEquationProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.05.
+  --LLMEquationProcessor_use_llm  Whether to use the LLM model. Default is
+                                  False.
+  --LLMEquationProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMEquationProcessor_min_equation_height FLOAT
+                                  The minimum ratio between equation height
+                                  and page height to consider for processing.
+                                  Default is 0.06.
+  --LLMEquationProcessor_redo_inline_math
+                                  Whether to redo inline math blocks. Default
+                                  is False.
+  --LLMEquationProcessor_equation_latex_prompt TEXT
+                                  The prompt to use for generating LaTeX from
+                                  equations. Default is a string containing
+                                  the Gemini prompt.
+  --LLMFormProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMFormProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMFormProcessor_use_llm      Whether to use the LLM model. Default is
+                                  False.
+  --LLMFormProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMHandwritingProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMHandwritingProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMHandwritingProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMHandwritingProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMHandwritingProcessor_handwriting_generation_prompt TEXT
+                                  The prompt to use for OCRing handwriting.
+                                  Default is a string containing the Gemini
+                                  prompt.
+  --LLMImageDescriptionProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMImageDescriptionProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMImageDescriptionProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMImageDescriptionProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMImageDescriptionProcessor_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --LLMImageDescriptionProcessor_image_description_prompt TEXT
+                                  The prompt to use for generating image
+                                  descriptions. Default is a string containing
+                                  the Gemini prompt.
+  --LLMMathBlockProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMMathBlockProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMMathBlockProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMMathBlockProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMMathBlockProcessor_redo_inline_math
+                                  If True, the inline math will be re-done,
+                                  otherwise it will be left as is. Default is
+                                  False.
+  --LLMMathBlockProcessor_inlinemath_min_ratio FLOAT
+                                  If more than this ratio of blocks are
+                                  inlinemath blocks, assume everything has
+                                  math. Default is 0.4.
+  --LLMSimpleBlockMetaProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMSimpleBlockMetaProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMSimpleBlockMetaProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMSimpleBlockMetaProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMPageCorrectionProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMPageCorrectionProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMPageCorrectionProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMPageCorrectionProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMPageCorrectionProcessor_block_correction_prompt TEXT
+                                  The user prompt to guide the block
+                                  correction process. Default is None.
+  --LLMSectionHeaderProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMSectionHeaderProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMSectionHeaderProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMSectionHeaderProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMTableProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMTableProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMTableProcessor_use_llm     Whether to use the LLM model. Default is
+                                  False.
+  --LLMTableProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMTableProcessor_max_rows_per_batch INTEGER
+                                  If the table has more rows than this, chunk
+                                  the table. (LLMs can be inaccurate with a
+                                  lot of rows) Default is 60.
+  --LLMTableProcessor_max_table_rows INTEGER
+                                  The maximum number of rows in a table to
+                                  process with the LLM processor.  Beyond this
+                                  will be skipped. Default is 175.
+  --LLMTableProcessor_table_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.
+  --LLMTableProcessor_rotation_max_wh_ratio FLOAT
+                                  The maximum width/height ratio for table
+                                  cells for a table to be considered rotated.
+                                  Default is 0.6.
+  --LLMTableProcessor_table_rewriting_prompt TEXT
+                                  The prompt to use for rewriting text.
+                                  Default is a string containing the Gemini
+                                  rewriting prompt.
+  --LLMTableMergeProcessor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --LLMTableMergeProcessor_image_expansion_ratio FLOAT
+                                  The ratio to expand the image by when
+                                  cropping. Default is 0.01.
+  --LLMTableMergeProcessor_use_llm
+                                  Whether to use the LLM model. Default is
+                                  False.
+  --LLMTableMergeProcessor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --LLMTableMergeProcessor_table_height_threshold FLOAT
+                                  The minimum height ratio relative to the
+                                  page for the first table in a pair to be
+                                  considered for merging. Default is 0.6.
+  --LLMTableMergeProcessor_table_start_threshold FLOAT
+                                  The maximum percentage down the page the
+                                  second table can start to be considered for
+                                  merging. Default is 0.2.
+  --LLMTableMergeProcessor_vertical_table_height_threshold FLOAT
+                                  The height tolerance for 2 adjacent tables
+                                  to be merged into one. Default is 0.25.
+  --LLMTableMergeProcessor_vertical_table_distance_threshold INTEGER
+                                  The maximum distance between table edges for
+                                  adjacency. Default is 20.
+  --LLMTableMergeProcessor_horizontal_table_width_threshold FLOAT
+                                  The width tolerance for 2 adjacent tables to
+                                  be merged into one. Default is 0.25.
+  --LLMTableMergeProcessor_horizontal_table_distance_threshold INTEGER
+                                  The maximum distance between table edges for
+                                  adjacency. Default is 10.
+  --LLMTableMergeProcessor_column_gap_threshold INTEGER
+                                  The maximum gap between columns to merge
+                                  tables Default is 50.
+  --LLMTableMergeProcessor_table_merge_prompt TEXT
+                                  The prompt to use for rewriting text.
+                                  Default is a string containing the Gemini
+                                  rewriting prompt.
+  --SectionHeaderProcessor_level_count INTEGER
+                                  The number of levels to use for headings.
+                                  Default is 4.
+  --SectionHeaderProcessor_merge_threshold FLOAT
+                                  The minimum gap between headings to consider
+                                  them part of the same group. Default is
+                                  0.25.
+  --SectionHeaderProcessor_default_level INTEGER
+                                  The default heading level to use if no
+                                  heading level is detected. Default is 2.
+  --SectionHeaderProcessor_height_tolerance FLOAT
+                                  The minimum height of a heading to consider
+                                  it a heading. Default is 0.99.
+  --TableProcessor_detect_boxes   Whether to detect boxes for the table
+                                  recognition model. Default is False.
+  --TableProcessor_detection_batch_size INTEGER
+                                  The batch size to use for the table
+                                  detection model. Default is None, which will
+                                  use the default batch size for the model.
+  --TableProcessor_table_rec_batch_size INTEGER
+                                  The batch size to use for the table
+                                  recognition model. Default is None, which
+                                  will use the default batch size for the
+                                  model.
+  --TableProcessor_recognition_batch_size INTEGER
+                                  The batch size to use for the table
+                                  recognition model. Default is None, which
+                                  will use the default batch size for the
+                                  model.
+  --TableProcessor_row_split_threshold FLOAT
+                                  The percentage of rows that need to be split
+                                  across the table before row splitting is
+                                  active. Default is 0.5.
+  --TableProcessor_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 1.
+  --TableProcessor_disable_tqdm   Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --TableProcessor_format_lines   Whether to format the lines. Default is
+                                  False.
+  --TableProcessor_drop_repeated_text
+                                  Drop repeated text in OCR results. Default
+                                  is False.
+  --TextProcessor_column_gap_ratio FLOAT
+                                  The minimum ratio of the page width to the
+                                  column gap to consider a column break.
+                                  Default is 0.02.
+  --ExtractionConverter_use_llm   Enable higher quality processing with LLMs.
+                                  Default is False.
+  --ExtractionConverter_pattern TEXT
+                                  Default is {\d+\}-{48}\n\n.
+  --ExtractionConverter_existing_markdown TEXT
+                                  Markdown that was already converted for
+                                  extraction. Default is None.
+  --PdfConverter_use_llm          Enable higher quality processing with LLMs.
+                                  Default is False.
+  --OCRConverter_use_llm          Enable higher quality processing with LLMs.
+                                  Default is False.
+  --TableConverter_use_llm        Enable higher quality processing with LLMs.
+                                  Default is False.
+  --DocumentProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --DocumentProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --DocumentProvider_force_ocr    Whether to force OCR on the whole document.
+                                  Default is False.
+  --DocumentProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --DocumentProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --DocumentProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --DocumentProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --DocumentProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --DocumentProvider_disable_links
+                                  Whether to disable links. Default is False.
+  --DocumentProvider_keep_chars   Whether to keep character-level information
+                                  in the output. Default is False.
+  --PdfProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --PdfProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --PdfProvider_force_ocr         Whether to force OCR on the whole document.
+                                  Default is False.
+  --PdfProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --PdfProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --PdfProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --PdfProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --PdfProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --PdfProvider_disable_links     Whether to disable links. Default is False.
+  --PdfProvider_keep_chars        Whether to keep character-level information
+                                  in the output. Default is False.
+  --EpubProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --EpubProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --EpubProvider_force_ocr        Whether to force OCR on the whole document.
+                                  Default is False.
+  --EpubProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --EpubProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --EpubProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --EpubProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --EpubProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --EpubProvider_disable_links    Whether to disable links. Default is False.
+  --EpubProvider_keep_chars       Whether to keep character-level information
+                                  in the output. Default is False.
+  --HTMLProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --HTMLProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --HTMLProvider_force_ocr        Whether to force OCR on the whole document.
+                                  Default is False.
+  --HTMLProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --HTMLProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --HTMLProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --HTMLProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --HTMLProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --HTMLProvider_disable_links    Whether to disable links. Default is False.
+  --HTMLProvider_keep_chars       Whether to keep character-level information
+                                  in the output. Default is False.
+  --ImageProvider_image_count INTEGER
+                                  Default is 1.
+  --PowerPointProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --PowerPointProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --PowerPointProvider_force_ocr  Whether to force OCR on the whole document.
+                                  Default is False.
+  --PowerPointProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --PowerPointProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --PowerPointProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --PowerPointProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --PowerPointProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --PowerPointProvider_disable_links
+                                  Whether to disable links. Default is False.
+  --PowerPointProvider_keep_chars
+                                  Whether to keep character-level information
+                                  in the output. Default is False.
+  --PowerPointProvider_include_slide_number
+                                  Default is False.
+  --SpreadSheetProvider_pdftext_workers INTEGER
+                                  The number of workers to use for pdftext.
+                                  Default is 4.
+  --SpreadSheetProvider_flatten_pdf BOOLEAN
+                                  Whether to flatten the PDF structure.
+                                  Default is True.
+  --SpreadSheetProvider_force_ocr
+                                  Whether to force OCR on the whole document.
+                                  Default is False.
+  --SpreadSheetProvider_ocr_space_threshold FLOAT
+                                  The minimum ratio of spaces to non-spaces to
+                                  detect bad text. Default is 0.7.
+  --SpreadSheetProvider_ocr_newline_threshold FLOAT
+                                  The minimum ratio of newlines to non-
+                                  newlines to detect bad text. Default is 0.6.
+  --SpreadSheetProvider_ocr_alphanum_threshold FLOAT
+                                  The minimum ratio of alphanumeric characters
+                                  to non-alphanumeric characters to consider
+                                  an alphanumeric character. Default is 0.3.
+  --SpreadSheetProvider_image_threshold FLOAT
+                                  The minimum coverage ratio of the image to
+                                  the page to consider skipping the page.
+                                  Default is 0.65.
+  --SpreadSheetProvider_strip_existing_ocr
+                                  Whether to strip existing OCR text from the
+                                  PDF. Default is False.
+  --SpreadSheetProvider_disable_links
+                                  Whether to disable links. Default is False.
+  --SpreadSheetProvider_keep_chars
+                                  Whether to keep character-level information
+                                  in the output. Default is False.
+  --ChunkRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --ChunkRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --ChunkRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --JSONRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --JSONRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --JSONRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --ExtractionRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --ExtractionRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --ExtractionRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --HTMLRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --HTMLRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --HTMLRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --HTMLRenderer_paginate_output  Whether to paginate the output. Default is
+                                  False.
+  --MarkdownRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --MarkdownRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --MarkdownRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --MarkdownRenderer_paginate_output
+                                  Whether to paginate the output. Default is
+                                  False.
+  --MarkdownRenderer_page_separator TEXT
+                                  The separator to use between pages. Default
+                                  is '-' * 48.
+  --OCRJSONRenderer_extract_images BOOLEAN
+                                  Extract images from the document. Default is
+                                  True.
+  --OCRJSONRenderer_keep_pageheader_in_output
+                                  Keep the page header in the output HTML.
+                                  Default is False.
+  --OCRJSONRenderer_keep_pagefooter_in_output
+                                  Keep the page footer in the output HTML.
+                                  Default is False.
+  --AzureOpenAIService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --AzureOpenAIService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --AzureOpenAIService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --AzureOpenAIService_azure_endpoint TEXT
+                                  The Azure OpenAI endpoint URL. No trailing
+                                  slash. Default is None.
+  --AzureOpenAIService_azure_api_key TEXT
+                                  The API key to use for the Azure OpenAI
+                                  service. Default is None.
+  --AzureOpenAIService_azure_api_version TEXT
+                                  The Azure OpenAI API version to use. Default
+                                  is None.
+  --AzureOpenAIService_deployment_name TEXT
+                                  The deployment name for the Azure OpenAI
+                                  model. Default is None.
+  --ClaudeService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --ClaudeService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --ClaudeService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --ClaudeService_claude_model_name TEXT
+                                  The name of the Google model to use for the
+                                  service. Default is
+                                  claude-3-7-sonnet-20250219.
+  --ClaudeService_claude_api_key TEXT
+                                  The Claude API key to use for the service.
+                                  Default is None.
+  --ClaudeService_max_claude_tokens INTEGER
+                                  The maximum number of tokens to use for a
+                                  single Claude request. Default is 8192.
+  --GoogleGeminiService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --GoogleGeminiService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --GoogleGeminiService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --GoogleGeminiService_gemini_model_name TEXT
+                                  The name of the Google model to use for the
+                                  service. Default is gemini-2.0-flash.
+  --GoogleGeminiService_gemini_api_key TEXT
+                                  The Google API key to use for the service.
+                                  Default is None.
+  --OllamaService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --OllamaService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --OllamaService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --OllamaService_ollama_base_url TEXT
+                                  The base url to use for ollama.  No trailing
+                                  slash. Default is http://localhost:11434.
+  --OllamaService_ollama_model TEXT
+                                  The model name to use for ollama. Default is
+                                  llama3.2-vision.
+  --OpenAIService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --OpenAIService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --OpenAIService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --OpenAIService_openai_base_url TEXT
+                                  The base url to use for OpenAI-like models.
+                                  No trailing slash. Default is
+                                  https://api.openai.com/v1.
+  --OpenAIService_openai_model TEXT
+                                  The model name to use for OpenAI-like model.
+                                  Default is gpt-4o-mini.
+  --OpenAIService_openai_api_key TEXT
+                                  The API key to use for the OpenAI-like
+                                  service. Default is None.
+  --OpenAIService_openai_image_format TEXT
+                                  The image format to use for the OpenAI-like
+                                  service. Use 'png' for better compatability
+                                  Default is webp.
+  --GoogleVertexService_timeout INTEGER
+                                  The timeout to use for the service. Default
+                                  is 30.
+  --GoogleVertexService_max_retries INTEGER
+                                  The maximum number of retries to use for the
+                                  service. Default is 2.
+  --GoogleVertexService_retry_wait_time INTEGER
+                                  The wait time between retries. Default is 3.
+  --GoogleVertexService_gemini_model_name TEXT
+                                  The name of the Google model to use for the
+                                  service. Default is gemini-2.0-flash-001.
+  --GoogleVertexService_vertex_project_id TEXT
+                                  Google Cloud Project ID for Vertex AI.
+                                  Default is None.
+  --GoogleVertexService_vertex_location TEXT
+                                  Google Cloud Location for Vertex AI. Default
+                                  is us-central1.
+  --GoogleVertexService_vertex_dedicated
+                                  Whether to use a dedicated Vertex AI
+                                  instance. Default is False.
+  --DocumentExtractor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --DocumentExtractor_disable_tqdm
+                                  Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --DocumentExtractor_page_schema TEXT
+                                  The JSON schema to be extracted from the
+                                  page. Default is .
+  --PageExtractor_max_concurrency INTEGER
+                                  The maximum number of concurrent requests to
+                                  make to the Gemini model. Default is 3.
+  --PageExtractor_disable_tqdm    Whether to disable the tqdm progress bar.
+                                  Default is False.
+  --PageExtractor_extraction_page_chunk_size INTEGER
+                                  The number of pages to chunk together for
+                                  extraction. Default is 3.
+  --PageExtractor_page_schema TEXT
+                                  The JSON schema to be extracted from the
+                                  page. Default is .
+  --help                          Show this message and exit.

@@ -2,10 +2,15 @@ from pymilvus import MilvusClient, Collection, connections
 from .embedding import get_embedding, get_batch_embeddings_large_scale
 from typing import List, Dict, Any, Optional
 import logging
+import sys
+import os
 
-# 设置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# 添加父目录到路径以便导入
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# 设置彩色日志
+from utils.colored_logger import get_colored_logger
+logger = get_colored_logger(__name__)
 
 
 def search_with_metadata_filter(

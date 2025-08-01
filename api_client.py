@@ -141,7 +141,7 @@ class ChatClient:
     
     def create_completion(
         self, 
-        messages: list[dict], 
+        messages: List[Any], 
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None
     ) -> str:
@@ -158,7 +158,7 @@ class ChatClient:
             return content if content else "No response generated."
         
         except Exception as e:
-            raise Exception(f"Chat completion API request failed: {e}")
+            raise Exception(f"Chat completion API request failed: {e} + messages={messages}")
 
 
 class ErrorHandler:

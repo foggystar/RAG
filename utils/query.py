@@ -2,6 +2,10 @@ import os
 import sys
 from typing import List, Optional, Dict, Any
 
+# 设置彩色日志
+from .colored_logger import get_colored_logger
+logger = get_colored_logger(__name__)
+
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -11,7 +15,7 @@ from config import Config, ModelType
 
 
 def split_query(
-    query: str,
+    query: List[str],
     api_key: Optional[str] = None
 ) -> List[str]:
     """
@@ -27,24 +31,27 @@ def split_query(
     try:
         client = ChatClient(api_key, ModelType.SPLIT)
         
+        # Convert list to string if needed
+        query_text = " ".join(query) if isinstance(query, list) else query
+        
         messages = [
             {
                 "role": "system", 
                 "content": "Split the query into 2-3 sub-questions. Output only the questions, one per line."
             },
-            {"role": "user", "content": query}
+            {"role": "user", "content": query_text}
         ]
-        
+    
         content = client.create_completion(messages)
         
         if content:
             questions = [line.strip() for line in content.split('\n') if line.strip()]
-            return [query]+questions if questions else [query]
-        return [query]
+            return query+questions if questions else query
+        return query
     
     except Exception as e:
-        print(f"Warning: Failed to split query: {e}")
-        return [query]
+        logger.warning(f"Failed to split query: {e}")
+        return query
 
 
 def query_to_database(question: str, pdfs: List[str]) -> List[Dict[str, Any]]:
@@ -87,14 +94,6 @@ def generate_answer(
     try:
         client = ChatClient(api_key, ModelType.CHAT)
         
-        # Format reference context
-        context = ""
-        for ref in reference:
-            context += f"Source: {ref.get('pdf_name', 'Unknown')} (Page {ref.get('page_number', 'N/A')})\n"
-            context += f"Content: {ref.get('text', '')}\n\n"
-        
-        # Combine questions into a single query
-
         
         # Set system prompt based on language
         if language.lower() == "chinese":
@@ -104,26 +103,14 @@ def generate_answer(
         
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Questions:\n{questions}\n\nContext:\n{context}"}
+            {"role": "user", "content": f"Questions:\n{questions}\n\nContext:\n{reference}"}
         ]
-        
-        print("Starting answer generation...")
+
+        logger.info("Starting answer generation...")
         content = client.create_completion(messages)
         return content if content else "No answer generated."
     
     except Exception as e:
-        print(f"Warning: Failed to generate answer: {e}")
+        logger.warning(f"Failed to generate answer: {e}")
         return "Failed to generate answer due to an error."
-
-
-# Keep original function name for backward compatibility
-def ans(
-    questions: List[str],
-    reference: List[Dict[str, Any]],
-    api_key: Optional[str] = None
-) -> str:
-    """
-    Legacy function name for backward compatibility
-    """
-    return generate_answer(questions, reference, api_key)
 

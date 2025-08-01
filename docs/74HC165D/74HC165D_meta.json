@@ -1,0 +1,2167 @@
+{
+  "table_of_contents": [
+    {
+      "title": "1. General description",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          49.9091796875,
+          163.528076171875
+        ],
+        [
+          201.5283203125,
+          163.528076171875
+        ],
+        [
+          201.5283203125,
+          180.41552734375
+        ],
+        [
+          49.9091796875,
+          180.41552734375
+        ]
+      ]
+    },
+    {
+      "title": "2. Features and benefits",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          49.3271484375,
+          278.13134765625
+        ],
+        [
+          215.93359375,
+          278.13134765625
+        ],
+        [
+          215.93359375,
+          294.3155517578125
+        ],
+        [
+          49.3271484375,
+          294.3155517578125
+        ]
+      ]
+    },
+    {
+      "title": "3. Applications",
+      "heading_level": null,
+      "page_id": 0,
+      "polygon": [
+        [
+          49.436279296875,
+          525.0166015625
+        ],
+        [
+          155.40234375,
+          525.0166015625
+        ],
+        [
+          155.40234375,
+          540.6396484375
+        ],
+        [
+          49.436279296875,
+          540.6396484375
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 1,
+      "polygon": [
+        [
+          360.859375,
+          56.7877197265625
+        ],
+        [
+          546.52734375,
+          56.7877197265625
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          360.859375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "4. Ordering information",
+      "heading_level": null,
+      "page_id": 1,
+      "polygon": [
+        [
+          50.0,
+          88.496337890625
+        ],
+        [
+          210.986328125,
+          88.496337890625
+        ],
+        [
+          210.986328125,
+          105.763916015625
+        ],
+        [
+          50.0,
+          105.763916015625
+        ]
+      ]
+    },
+    {
+      "title": "5. Functional diagram",
+      "heading_level": null,
+      "page_id": 1,
+      "polygon": [
+        [
+          49.54541015625,
+          266.20849609375
+        ],
+        [
+          200.21875,
+          266.20849609375
+        ],
+        [
+          200.21875,
+          282.91558837890625
+        ],
+        [
+          49.54541015625,
+          282.91558837890625
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          361.44140625,
+          57.250244140625
+        ],
+        [
+          545.9453125,
+          57.250244140625
+        ],
+        [
+          545.9453125,
+          69.77862548828125
+        ],
+        [
+          361.44140625,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "6. Pinning information",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          49.54541015625,
+          89.318603515625
+        ],
+        [
+          204.29296875,
+          89.318603515625
+        ],
+        [
+          204.29296875,
+          105.969482421875
+        ],
+        [
+          49.54541015625,
+          105.969482421875
+        ]
+      ]
+    },
+    {
+      "title": "6.1. Pinning",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          146.962890625,
+          129.30126953125
+        ],
+        [
+          221.462890625,
+          129.30126953125
+        ],
+        [
+          221.462890625,
+          144.072021484375
+        ],
+        [
+          146.962890625,
+          144.072021484375
+        ]
+      ]
+    },
+    {
+      "title": "6.2. Pin description",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          149.291015625,
+          394.48193359375
+        ],
+        [
+          265.697265625,
+          394.48193359375
+        ],
+        [
+          265.697265625,
+          409.13104248046875
+        ],
+        [
+          149.291015625,
+          409.13104248046875
+        ]
+      ]
+    },
+    {
+      "title": "Table 2. Pin description",
+      "heading_level": null,
+      "page_id": 2,
+      "polygon": [
+        [
+          49.9091796875,
+          418.9443359375
+        ],
+        [
+          151.4736328125,
+          418.9443359375
+        ],
+        [
+          151.4736328125,
+          430.4560546875
+        ],
+        [
+          49.9091796875,
+          430.4560546875
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 3,
+      "polygon": [
+        [
+          361.150390625,
+          57.3016357421875
+        ],
+        [
+          546.818359375,
+          57.3016357421875
+        ],
+        [
+          546.818359375,
+          69.77862548828125
+        ],
+        [
+          361.150390625,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "7. Functional description",
+      "heading_level": null,
+      "page_id": 3,
+      "polygon": [
+        [
+          49.98193359375,
+          88.2393798828125
+        ],
+        [
+          221.75390625,
+          88.2393798828125
+        ],
+        [
+          221.75390625,
+          105.41552734375
+        ],
+        [
+          49.98193359375,
+          105.41552734375
+        ]
+      ]
+    },
+    {
+      "title": "Table 3. Function table",
+      "heading_level": null,
+      "page_id": 3,
+      "polygon": [
+        [
+          50.0,
+          117.070068359375
+        ],
+        [
+          147.9814453125,
+          117.070068359375
+        ],
+        [
+          147.9814453125,
+          128.70684814453125
+        ],
+        [
+          50.0,
+          128.70684814453125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          360.568359375,
+          57.1474609375
+        ],
+        [
+          546.818359375,
+          57.1474609375
+        ],
+        [
+          546.818359375,
+          69.77862548828125
+        ],
+        [
+          360.568359375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "8. Limiting values",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          49.83642578125,
+          88.907470703125
+        ],
+        [
+          173.154296875,
+          88.907470703125
+        ],
+        [
+          173.154296875,
+          105.41552734375
+        ],
+        [
+          49.83642578125,
+          105.41552734375
+        ]
+      ]
+    },
+    {
+      "title": "Table 4. Limiting values",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          49.6181640625,
+          117.070068359375
+        ],
+        [
+          153.07421875,
+          117.070068359375
+        ],
+        [
+          153.07421875,
+          128.70684814453125
+        ],
+        [
+          49.6181640625,
+          128.70684814453125
+        ]
+      ]
+    },
+    {
+      "title": "9. Recommended operating conditions",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          49.181640625,
+          350.90185546875
+        ],
+        [
+          312.259765625,
+          350.90185546875
+        ],
+        [
+          312.259765625,
+          366.91558837890625
+        ],
+        [
+          49.181640625,
+          366.91558837890625
+        ]
+      ]
+    },
+    {
+      "title": "Table 5. Recommended operating conditions",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          49.47265625,
+          379.88671875
+        ],
+        [
+          243.1435546875,
+          379.88671875
+        ],
+        [
+          243.1435546875,
+          390.9873046875
+        ],
+        [
+          49.47265625,
+          390.9873046875
+        ]
+      ]
+    },
+    {
+      "title": "10. Static characteristics",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          50.0,
+          561.607421875
+        ],
+        [
+          220.880859375,
+          561.607421875
+        ],
+        [
+          220.880859375,
+          577.8155822753906
+        ],
+        [
+          50.0,
+          577.8155822753906
+        ]
+      ]
+    },
+    {
+      "title": "Table 6. Static characteristics",
+      "heading_level": null,
+      "page_id": 4,
+      "polygon": [
+        [
+          50.0,
+          590.7978515625
+        ],
+        [
+          177.228515625,
+          590.7978515625
+        ],
+        [
+          177.228515625,
+          602.3095703125
+        ],
+        [
+          50.0,
+          602.3095703125
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 5,
+      "polygon": [
+        [
+          50.0,
+          33.4559326171875
+        ],
+        [
+          546.52734375,
+          33.4559326171875
+        ],
+        [
+          546.52734375,
+          52.05908203125
+        ],
+        [
+          50.0,
+          52.05908203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 5,
+      "polygon": [
+        [
+          361.150390625,
+          57.9183349609375
+        ],
+        [
+          546.236328125,
+          57.9183349609375
+        ],
+        [
+          546.236328125,
+          69.77862548828125
+        ],
+        [
+          361.150390625,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "11. Dynamic characteristics",
+      "heading_level": null,
+      "page_id": 6,
+      "polygon": [
+        [
+          49.69091796875,
+          87.982421875
+        ],
+        [
+          239.796875,
+          87.982421875
+        ],
+        [
+          239.796875,
+          105.6611328125
+        ],
+        [
+          49.69091796875,
+          105.6611328125
+        ]
+      ]
+    },
+    {
+      "title": "Table 7. Dynamic characteristics",
+      "heading_level": null,
+      "page_id": 6,
+      "polygon": [
+        [
+          49.9091796875,
+          116.658935546875
+        ],
+        [
+          190.4697265625,
+          116.658935546875
+        ],
+        [
+          190.4697265625,
+          128.787353515625
+        ],
+        [
+          49.9091796875,
+          128.787353515625
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 7,
+      "polygon": [
+        [
+          50.0,
+          33.50732421875
+        ],
+        [
+          546.236328125,
+          33.50732421875
+        ],
+        [
+          546.236328125,
+          52.05908203125
+        ],
+        [
+          50.0,
+          52.05908203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 7,
+      "polygon": [
+        [
+          361.44140625,
+          57.76416015625
+        ],
+        [
+          545.9453125,
+          57.76416015625
+        ],
+        [
+          545.9453125,
+          69.77862548828125
+        ],
+        [
+          361.44140625,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 8,
+      "polygon": [
+        [
+          50.0,
+          33.404541015625
+        ],
+        [
+          546.236328125,
+          33.404541015625
+        ],
+        [
+          546.236328125,
+          52.05908203125
+        ],
+        [
+          50.0,
+          52.05908203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 8,
+      "polygon": [
+        [
+          360.859375,
+          57.661376953125
+        ],
+        [
+          546.52734375,
+          57.661376953125
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          360.859375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 9,
+      "polygon": [
+        [
+          50.0,
+          33.7642822265625
+        ],
+        [
+          546.52734375,
+          33.7642822265625
+        ],
+        [
+          546.52734375,
+          52.727783203125
+        ],
+        [
+          50.0,
+          52.727783203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 9,
+      "polygon": [
+        [
+          360.27734375,
+          56.8905029296875
+        ],
+        [
+          546.52734375,
+          56.8905029296875
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          360.27734375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "11.1. Waveforms and test circuit",
+      "heading_level": null,
+      "page_id": 9,
+      "polygon": [
+        [
+          144.7802734375,
+          90.24365234375
+        ],
+        [
+          336.4140625,
+          90.24365234375
+        ],
+        [
+          336.4140625,
+          104.736083984375
+        ],
+        [
+          144.7802734375,
+          104.736083984375
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 10,
+      "polygon": [
+        [
+          50.0,
+          33.6614990234375
+        ],
+        [
+          545.9453125,
+          33.6614990234375
+        ],
+        [
+          545.9453125,
+          52.83056640625
+        ],
+        [
+          50.0,
+          52.83056640625
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 10,
+      "polygon": [
+        [
+          359.6953125,
+          57.55859375
+        ],
+        [
+          546.52734375,
+          57.55859375
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          359.6953125,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 11,
+      "polygon": [
+        [
+          50.0,
+          33.78997802734375
+        ],
+        [
+          546.236328125,
+          33.78997802734375
+        ],
+        [
+          546.236328125,
+          52.23956298828125
+        ],
+        [
+          50.0,
+          52.23956298828125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 11,
+      "polygon": [
+        [
+          362.0234375,
+          57.4044189453125
+        ],
+        [
+          547.109375,
+          57.4044189453125
+        ],
+        [
+          547.109375,
+          69.77862548828125
+        ],
+        [
+          362.0234375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Fig. 10. Test circuit for measuring switching times",
+      "heading_level": null,
+      "page_id": 11,
+      "polygon": [
+        [
+          50.345703125,
+          403.8517761230469
+        ],
+        [
+          268.7439880371094,
+          403.8517761230469
+        ],
+        [
+          268.7439880371094,
+          415.86083984375
+        ],
+        [
+          50.345703125,
+          415.86083984375
+        ]
+      ]
+    },
+    {
+      "title": "Table 9. Test data",
+      "heading_level": null,
+      "page_id": 11,
+      "polygon": [
+        [
+          50.0,
+          425.5224609375
+        ],
+        [
+          127.9013671875,
+          425.5224609375
+        ],
+        [
+          127.9013671875,
+          436.2119140625
+        ],
+        [
+          50.0,
+          436.2119140625
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 12,
+      "polygon": [
+        [
+          359.986328125,
+          57.250244140625
+        ],
+        [
+          546.236328125,
+          57.250244140625
+        ],
+        [
+          546.236328125,
+          69.77862548828125
+        ],
+        [
+          359.986328125,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "12. Package outline",
+      "heading_level": null,
+      "page_id": 12,
+      "polygon": [
+        [
+          50.0,
+          89.524169921875
+        ],
+        [
+          188.1416015625,
+          89.524169921875
+        ],
+        [
+          188.1416015625,
+          106.072265625
+        ],
+        [
+          50.0,
+          106.072265625
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 13,
+      "polygon": [
+        [
+          50.0,
+          33.9698486328125
+        ],
+        [
+          546.52734375,
+          33.9698486328125
+        ],
+        [
+          546.52734375,
+          52.05908203125
+        ],
+        [
+          50.0,
+          52.05908203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 13,
+      "polygon": [
+        [
+          362.0234375,
+          57.4044189453125
+        ],
+        [
+          546.52734375,
+          57.4044189453125
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          362.0234375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Nexperia 74HC165; 74HCT165",
+      "heading_level": null,
+      "page_id": 14,
+      "polygon": [
+        [
+          50.0,
+          33.5587158203125
+        ],
+        [
+          546.818359375,
+          33.5587158203125
+        ],
+        [
+          546.818359375,
+          52.05908203125
+        ],
+        [
+          50.0,
+          52.05908203125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 14,
+      "polygon": [
+        [
+          362.896484375,
+          57.4044189453125
+        ],
+        [
+          546.818359375,
+          57.4044189453125
+        ],
+        [
+          546.818359375,
+          69.77862548828125
+        ],
+        [
+          362.896484375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 15,
+      "polygon": [
+        [
+          360.859375,
+          56.7877197265625
+        ],
+        [
+          546.52734375,
+          56.7877197265625
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          360.859375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "13. Abbreviations",
+      "heading_level": null,
+      "page_id": 15,
+      "polygon": [
+        [
+          50.0,
+          88.8046875
+        ],
+        [
+          172.4267578125,
+          88.8046875
+        ],
+        [
+          172.4267578125,
+          105.41552734375
+        ],
+        [
+          50.0,
+          105.41552734375
+        ]
+      ]
+    },
+    {
+      "title": "14. Revision history",
+      "heading_level": null,
+      "page_id": 15,
+      "polygon": [
+        [
+          50.0,
+          299.51025390625
+        ],
+        [
+          186.9775390625,
+          299.51025390625
+        ],
+        [
+          186.9775390625,
+          315.71551513671875
+        ],
+        [
+          50.0,
+          315.71551513671875
+        ]
+      ]
+    },
+    {
+      "title": "15. Legal information",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          50.0,
+          88.8046875
+        ],
+        [
+          197.017578125,
+          88.8046875
+        ],
+        [
+          197.017578125,
+          106.4833984375
+        ],
+        [
+          50.0,
+          106.4833984375
+        ]
+      ]
+    },
+    {
+      "title": "Data sheet status",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          49.9091796875,
+          122.517578125
+        ],
+        [
+          120.3349609375,
+          122.517578125
+        ],
+        [
+          120.3349609375,
+          133.033203125
+        ],
+        [
+          49.9091796875,
+          133.033203125
+        ]
+      ]
+    },
+    {
+      "title": "Definitions",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          49.47265625,
+          322.94482421875
+        ],
+        [
+          93.35240173339844,
+          322.94482421875
+        ],
+        [
+          93.35240173339844,
+          333.1131286621094
+        ],
+        [
+          49.47265625,
+          333.1131286621094
+        ]
+      ]
+    },
+    {
+      "title": "Disclaimers",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          49.763671875,
+          511.44921875
+        ],
+        [
+          97.13240051269531,
+          511.44921875
+        ],
+        [
+          97.13240051269531,
+          521.9931335449219
+        ],
+        [
+          49.763671875,
+          521.9931335449219
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          362.0234375,
+          58.278076171875
+        ],
+        [
+          546.52734375,
+          58.278076171875
+        ],
+        [
+          546.52734375,
+          69.77862548828125
+        ],
+        [
+          362.0234375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Trademarks",
+      "heading_level": null,
+      "page_id": 16,
+      "polygon": [
+        [
+          305.43701171875,
+          720.7158203125
+        ],
+        [
+          353.001953125,
+          720.7158203125
+        ],
+        [
+          353.001953125,
+          731.3331680297852
+        ],
+        [
+          305.43701171875,
+          731.3331680297852
+        ]
+      ]
+    },
+    {
+      "title": "8-bit parallel-in/serial out shift register",
+      "heading_level": null,
+      "page_id": 17,
+      "polygon": [
+        [
+          362.0234375,
+          56.8905029296875
+        ],
+        [
+          545.9453125,
+          56.8905029296875
+        ],
+        [
+          545.9453125,
+          69.77862548828125
+        ],
+        [
+          362.0234375,
+          69.77862548828125
+        ]
+      ]
+    },
+    {
+      "title": "Contents",
+      "heading_level": null,
+      "page_id": 17,
+      "polygon": [
+        [
+          49.54541015625,
+          90.2950439453125
+        ],
+        [
+          110.6199951171875,
+          90.2950439453125
+        ],
+        [
+          110.6199951171875,
+          106.8155517578125
+        ],
+        [
+          49.54541015625,
+          106.8155517578125
+        ]
+      ]
+    },
+    {
+      "title": "\u00a9 Nexperia B.V. 2024. All rights reserved",
+      "heading_level": null,
+      "page_id": 17,
+      "polygon": [
+        [
+          50.0,
+          399.41552734375
+        ],
+        [
+          193.525390625,
+          399.41552734375
+        ],
+        [
+          193.525390625,
+          408.4806213378906
+        ],
+        [
+          50.0,
+          408.4806213378906
+        ]
+      ]
+    }
+  ],
+  "page_stats": [
+    {
+      "page_id": 0,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          149
+        ],
+        [
+          "Line",
+          31
+        ],
+        [
+          "ListItem",
+          18
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "Reference",
+          3
+        ],
+        [
+          "Picture",
+          2
+        ],
+        [
+          "Text",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "ListGroup",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 1,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          293
+        ],
+        [
+          "Line",
+          93
+        ],
+        [
+          "TableCell",
+          26
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "Reference",
+          2
+        ],
+        [
+          "Table",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 2,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          355
+        ],
+        [
+          "Line",
+          101
+        ],
+        [
+          "TableCell",
+          30
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          5
+        ],
+        [
+          "Reference",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 3,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          275
+        ],
+        [
+          "TableCell",
+          99
+        ],
+        [
+          "Line",
+          39
+        ],
+        [
+          "PageFooter",
+          5
+        ],
+        [
+          "Text",
+          4
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "Table",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Reference",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 4,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          641
+        ],
+        [
+          "TableCell",
+          221
+        ],
+        [
+          "Line",
+          58
+        ],
+        [
+          "SectionHeader",
+          7
+        ],
+        [
+          "Text",
+          7
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "Reference",
+          5
+        ],
+        [
+          "Table",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 5,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          732
+        ],
+        [
+          "TableCell",
+          352
+        ],
+        [
+          "Line",
+          82
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 6,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          631
+        ],
+        [
+          "TableCell",
+          372
+        ],
+        [
+          "Line",
+          54
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "PageHeader",
+          3
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "Reference",
+          2
+        ],
+        [
+          "Text",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 7,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          685
+        ],
+        [
+          "TableCell",
+          417
+        ],
+        [
+          "Line",
+          60
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 8,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          507
+        ],
+        [
+          "TableCell",
+          262
+        ],
+        [
+          "Line",
+          66
+        ],
+        [
+          "Text",
+          8
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Table",
+          1
+        ],
+        [
+          "TextInlineMath",
+          1
+        ],
+        [
+          "Reference",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 9,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          247
+        ],
+        [
+          "Line",
+          65
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "Reference",
+          4
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 10,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          243
+        ],
+        [
+          "Line",
+          50
+        ],
+        [
+          "TableCell",
+          15
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "Reference",
+          3
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 11,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          279
+        ],
+        [
+          "Line",
+          47
+        ],
+        [
+          "TableCell",
+          23
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          4
+        ],
+        [
+          "Reference",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Table",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 12,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          312
+        ],
+        [
+          "Line",
+          80
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "Reference",
+          2
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Text",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 13,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          252
+        ],
+        [
+          "Line",
+          70
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Text",
+          1
+        ],
+        [
+          "Reference",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 14,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          362
+        ],
+        [
+          "Line",
+          87
+        ],
+        [
+          "PageFooter",
+          5
+        ],
+        [
+          "SectionHeader",
+          2
+        ],
+        [
+          "PageHeader",
+          1
+        ],
+        [
+          "Figure",
+          1
+        ],
+        [
+          "Text",
+          1
+        ],
+        [
+          "Footnote",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 15,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          322
+        ],
+        [
+          "TableCell",
+          89
+        ],
+        [
+          "Line",
+          44
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "Table",
+          2
+        ],
+        [
+          "Reference",
+          2
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 16,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          934
+        ],
+        [
+          "Line",
+          149
+        ],
+        [
+          "Text",
+          22
+        ],
+        [
+          "TableCell",
+          12
+        ],
+        [
+          "SectionHeader",
+          6
+        ],
+        [
+          "PageFooter",
+          6
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "ListItem",
+          2
+        ],
+        [
+          "Table",
+          1
+        ],
+        [
+          "ListGroup",
+          1
+        ],
+        [
+          "Reference",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    },
+    {
+      "page_id": 17,
+      "text_extraction_method": "pdftext",
+      "block_counts": [
+        [
+          "Span",
+          145
+        ],
+        [
+          "TableCell",
+          40
+        ],
+        [
+          "Line",
+          27
+        ],
+        [
+          "PageFooter",
+          5
+        ],
+        [
+          "SectionHeader",
+          3
+        ],
+        [
+          "Text",
+          3
+        ],
+        [
+          "PageHeader",
+          2
+        ],
+        [
+          "TableOfContents",
+          1
+        ]
+      ],
+      "block_metadata": {
+        "llm_request_count": 0,
+        "llm_error_count": 0,
+        "llm_tokens_used": 0,
+        "previous_text": "",
+        "previous_type": "",
+        "previous_order": 0
+      }
+    }
+  ],
+  "debug_data_path": "debug_data/74HC165D"
+}

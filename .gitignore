@@ -36,3 +36,6 @@ Thumbs.db
 
 # Performance test files
 quick_performance_test.py
+
+# Models
+models/

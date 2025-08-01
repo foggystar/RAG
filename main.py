@@ -1,12 +1,17 @@
 from rag_modules import clear
 # from rag_modules.pdf_manager import PDFManager
-from utilties import load_pdf, query
+from utils import convert, query
+from utils.colored_logger import get_colored_logger
 import sys
+import logging
+
+# 设置彩色日志
+logger = get_colored_logger(__name__)
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python main.py <command> [args]")
-        print("Commands: --load <pdf_name>, --clear, --query <question>, --include <pdf_name>, --split")
+        logger.error("Usage: python main.py <command> [args]")
+        logger.error("Commands: --load <pdf_name>, --clear, --query <question>, --include <pdf_name>, --split")
         return
     pdfs=[]
     question_parts = []
@@ -22,7 +27,7 @@ def main():
         match command:
             case "--load":
                 if i + 1 >= len(sys.argv):
-                    print("Usage: python main.py load <pdf_name>")
+                    logger.error("Usage: python main.py load <pdf_name>")
                     return
                 pdf_name = sys.argv[i + 1]
                 toLoad.append(pdf_name)
@@ -35,69 +40,56 @@ def main():
                 i += 1
             case "--query":
                 if i + 1 >= len(sys.argv):
-                    print("Usage: python main.py query <question>")
+                    logger.error("Usage: python main.py query <question>")
                     return
                 # Find the next command or end of arguments for the question
                 
                 j = i + 1
                 question_parts.append(sys.argv[j])
                 if not question_parts:
-                    print("Usage: python main.py query <question>")
+                    logger.error("Usage: python main.py query <question>")
                     return
                 
                 i = j + 1  # Move to next command
             case "--include":
                 if i + 1 >= len(sys.argv):
-                    print("Usage: python main.py include <pdf_name>")
+                    logger.error("Usage: python main.py include <pdf_name>")
                     return  
                 pdfs.append(sys.argv[i + 1])
                 # Add your include functionality here
                 i += 2  # Skip the pdf_name argument
             case _:
-                print(f"Unknown command: {command}")
-                print("Available commands: --load, --clear, --query, --include, --split")
+                logger.error(f"Unknown command: {command}")
+                logger.error("Available commands: --load, --clear, --query, --include, --split")
                 i += 1
 
     # Load PDFs if any
     if toLoad:
         for pdf_name in toLoad:
             try:
-                load_pdf.load_pdf(pdf_name)
-                print(f"Loaded PDF: {pdf_name}")
+                convert.load_pdf(pdf_name)
+                logger.info(f"Loaded PDF: {pdf_name}")
             except Exception as e:
-                print(f"Failed to load PDF {pdf_name}: {e}")
+                logger.error(f"Failed to load PDF {pdf_name}: {e}")
     if should_clear:
         clear.clear_data()
     # Process questions
-    if split and question_parts:
-        # Apply split to all questions at once to avoid modifying list during iteration
-        original_questions = question_parts.copy()
-        question_parts = []
-        for question in original_questions:
-            try:
-                split_questions = query.split_query(question)
-                if isinstance(split_questions, list):
-                    question_parts.extend(split_questions)
-                else:
-                    # If split_query returns a string, split by newlines or keep as single question
-                    question_parts.append(split_questions)
-            except Exception as e:
-                print(f"Failed to split question '{question}': {e}")
-                question_parts.append(question)  # Keep original question if split fails
+    split_questions = query.split_query(question_parts)
     
-    for question in question_parts:
+    response = []
+    for question in split_questions:
         try:
-            response = query.query_to_database(question, pdfs)
+            logger.info(f"Querying: {question}")
+            response.append(query.query_to_database(question, pdfs))
             # print(f"Query: {question}\n Results:")
-            if response:
-                # for result in response:
-                #     print(f"PDF Name: {result['pdf_name']}, Page: {result['page_number']}, Content: {result['text'][:50]}...")
-                #     print("-" * 80)
-                print(query.generate_answer([question], response))
-            else:
-                print("No results found for the query.")
+            
         except Exception as e:
-            print(f"Failed to query '{question}': {e}")
+            logger.error(f"Failed to query '{question}': {e}")
+
+    if response:
+        print(query.generate_answer(split_questions, response))
+    else:
+        logger.warning("No results found for the query.")
 
 
 if __name__ == "__main__":

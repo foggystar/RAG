@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "bs4>=0.0.2",
     "fastapi[standard]>=0.116.1",
-    "langchain-community>=0.3.27",
+    "marker-pdf>=1.8.2",
     "openai>=1.97.1",
     "pdfminer>=20191125",
     "pdfminer-six>=20250506",

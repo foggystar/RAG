@@ -29,7 +29,7 @@ class ModelConfig:
 @dataclass
 class DatabaseConfig:
     """Database configuration settings"""
-    path: str = "milvus_rag.db"
+    path: str = "database/milvus_rag.db"
     collection_name: str = "rag_docs"
 
 
@@ -39,6 +39,9 @@ class Config:
     # API Configuration
     API_BASE_URL = "https://api.siliconflow.cn/v1"
     API_KEY_ENV_VAR = "siliconflow_api_key"
+
+    # Marker Configuration
+    MODEL_DIR = "/home/foggystar/Projects/RAG/models"
     
     # Model Configurations
     MODELS = {

@@ -5,6 +5,15 @@ PDF文档管理工具
 
 from typing import List, Optional
 from pymilvus import MilvusClient
+import sys
+import os
+
+# 添加父目录到路径以便导入
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# 设置彩色日志
+from utils.colored_logger import get_colored_logger
+logger = get_colored_logger(__name__)
 
 
 class PDFManager:
@@ -36,16 +45,16 @@ class PDFManager:
         """
         try:
             if not self.client.has_collection(collection_name=self.collection_name):
-                print(f"集合 '{self.collection_name}' 不存在")
+                logger.warning(f"集合 '{self.collection_name}' 不存在")
                 return False
             
-            print(f"警告: MilvusClient不支持直接更新字段值")
-            print(f"建议重新插入数据时将 '{pdf_name}' 的 is_blocked 设置为 True")
+            logger.warning(f"MilvusClient不支持直接更新字段值")
+            logger.info(f"建议重新插入数据时将 '{pdf_name}' 的 is_blocked 设置为 True")
             
             return True
             
         except Exception as e:
-            print(f"屏蔽PDF失败: {e}")
+            logger.error(f"屏蔽PDF失败: {e}")
             return False
     
     def unblock_pdf(self, pdf_name: str) -> bool:
@@ -60,16 +69,16 @@ class PDFManager:
         """
         try:
             if not self.client.has_collection(collection_name=self.collection_name):
-                print(f"集合 '{self.collection_name}' 不存在")
+                logger.warning(f"集合 '{self.collection_name}' 不存在")
                 return False
             
-            print(f"警告: MilvusClient不支持直接更新字段值")
-            print(f"建议重新插入数据时将 '{pdf_name}' 的 is_blocked 设置为 False")
+            logger.warning(f"MilvusClient不支持直接更新字段值")
+            logger.info(f"建议重新插入数据时将 '{pdf_name}' 的 is_blocked 设置为 False")
             
             return True
             
         except Exception as e:
-            print(f"解除屏蔽PDF失败: {e}")
+            logger.error(f"解除屏蔽PDF失败: {e}")
             return False
     
     def list_pdfs(self, only_blocked: Optional[bool] = None) -> List[dict]:
@@ -84,7 +93,7 @@ class PDFManager:
         """
         try:
             if not self.client.has_collection(collection_name=self.collection_name):
-                print(f"集合 '{self.collection_name}' 不存在")
+                logger.warning(f"集合 '{self.collection_name}' 不存在")
                 return []
             
             # 使用MilvusClient查询数据
@@ -125,7 +134,7 @@ class PDFManager:
             return list(pdf_stats.values())
             
         except Exception as e:
-            print(f"查询PDF列表失败: {e}")
+            logger.error(f"查询PDF列表失败: {e}")
             return []
     
     def get_pdf_stats(self) -> dict:
@@ -152,5 +161,5 @@ class PDFManager:
             return stats
             
         except Exception as e:
-            print(f"获取统计信息失败: {e}")
+            logger.error(f"获取统计信息失败: {e}")
             return {}

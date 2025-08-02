@@ -74,7 +74,8 @@ class Config:
     MAX_CONCURRENT_WORKERS = 3
     TEXTS_PER_WORKER = 100
     RELEVANCE_THRESHOLD = 0.2
-    DEFAULT_SEARCH_LIMIT = 10
+    DEFAULT_SEARCH_LIMIT = 15
+    DEFAULT_RERANK_LIMIT = 5
     
     @classmethod
     def get_api_key(cls) -> str:

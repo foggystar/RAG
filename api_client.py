@@ -151,6 +151,27 @@ class ChatClient:
         except Exception as e:
             raise Exception(f"Chat completion API request failed: {e} + messages={messages}")
 
+    def create_completion_stream(
+        self, 
+        messages: List[Any]
+    ):
+        """Create a streaming chat completion"""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_config.name,
+                messages=messages,
+                max_tokens=self.model_config.max_tokens,
+                temperature=self.model_config.temperature,
+                stream=True
+            )
+            
+            for chunk in response:
+                if chunk.choices[0].delta.content is not None:
+                    yield chunk.choices[0].delta.content
+        
+        except Exception as e:
+            raise Exception(f"Chat streaming completion API request failed: {e} + messages={messages}")
+
 
 class ErrorHandler:
     """Centralized error handling for API operations"""

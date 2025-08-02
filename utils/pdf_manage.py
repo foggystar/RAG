@@ -104,24 +104,68 @@ async def query_pdfs_async(question: str, active_pdf_names: list):
         
         logger.info(f"Querying: '{question}' using PDFs: {active_pdf_names}")
 
-        split_query = ast.literal_eval(query.split_query(question))
-        split_query.insert(0, question)  # Ensure the original question is included
+        split_queries = ast.literal_eval(query.split_query(question))
+        split_queries.insert(0, question)  # Ensure the original question is included
 
-        logger.info(f"Split Query Success: {split_query}")
+        logger.info(f"Split Query Success: {split_queries}")
 
-        
-        
-        # Get references and rerank
-        references = refer.get_reference(split_query=split_query, included_pdfs=active_pdf_names)
+        # Get references and rerank (async)
+        references = await refer.get_reference(split_query=split_queries, included_pdfs=active_pdf_names)
         
         # Generate final answer
-        answer = generate_answer(split_query, references)
+        answer = generate_answer(split_queries, references)
         
         return answer
         
     except Exception as e:
         logger.error(f"Error querying PDFs: {e}")
         return f"Error occurred while processing your query: {e}"
+
+
+async def query_pdfs_stream_async(question: str, active_pdf_names: list):
+    """
+    Streaming async version of query_pdfs for use with FastAPI.
+    
+    Args:
+        question: User's question
+        active_pdf_names: List of currently active PDF names
+    
+    Yields:
+        str: Chunks of generated answer
+    """
+    try:
+        from rag_modules.search import search_async
+        from rag_modules import reranker, refer
+        from rag_modules.query import split_query, generate_answer_stream
+        
+        logger.info(f"Streaming query: '{question}' using PDFs: {active_pdf_names}")
+
+        # Split query (this can be blocking, but it's usually fast)
+        split_queries = ast.literal_eval(query.split_query(question))
+        split_queries.insert(0, question)  # Ensure the original question is included
+
+        logger.info(f"Split Query Success: {split_queries}")
+        
+        # Get references and rerank (async) - this is the potentially slow part
+        references = await refer.get_reference(split_query=split_queries, included_pdfs=active_pdf_names)
+        logger.info(f"Retrieved {len(references)} references")
+        
+        # Generate streaming answer - this should be truly streaming
+        chunk_count = 0
+        for chunk in generate_answer_stream(split_queries, references):
+            if chunk:
+                chunk_count += 1
+                logger.debug(f"Yielding chunk {chunk_count}: {chunk[:50]}...")
+                yield chunk
+                # Add small delay to ensure true streaming behavior
+                import asyncio
+                await asyncio.sleep(0.01)  # Small delay to prevent overwhelming
+        
+        logger.info(f"Streaming completed with {chunk_count} chunks")
+        
+    except Exception as e:
+        logger.error(f"Error in streaming query: {e}")
+        yield f"Error occurred while processing your query: {e}"
 
 
 def query_pdfs(question: str, active_pdf_names: list):
@@ -141,18 +185,16 @@ def query_pdfs(question: str, active_pdf_names: list):
         
         logger.info(f"Querying: '{question}' using PDFs: {active_pdf_names}")
 
-        split_query = ast.literal_eval(query.split_query(question))
-        split_query.insert(0, question)  # Ensure the original question is included
+        split_queries = ast.literal_eval(query.split_query(question))
+        split_queries.insert(0, question)  # Ensure the original question is included
 
-        logger.info(f"Split Query Success: {split_query}")
+        logger.info(f"Split Query Success: {split_queries}")
 
-        
-        
-        # Get references and rerank
-        references = refer.get_reference(split_query=split_query, included_pdfs=active_pdf_names)
+        # Get references and rerank (sync version)
+        references = refer.get_reference_sync(split_query=split_queries, included_pdfs=active_pdf_names)
         
         # Generate final answer
-        answer = generate_answer(split_query, references)
+        answer = generate_answer(split_queries, references)
         
         return answer
         

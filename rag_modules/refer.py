@@ -13,17 +13,18 @@ logger = get_colored_logger(__name__,level=logging.INFO)
 
 
 async def get_reference(
-        split_query: str,
+        split_query: List[str],
         included_pdfs: List[str]
 ) -> List[Dict[str, Any]]:
     
     try:
-        search_results = list(await search.search_async(
+        search_results = await search.search_async(
                 query=split_query,
                 included_pdfs=included_pdfs
-        ))
+        )
     except Exception as e:
         logger.error(f"Search operation failed: {e}")
+        return []
 
     all_docs = []
     # de_duplicator = set()  # 用于去重
@@ -53,3 +54,12 @@ async def get_reference(
         except Exception as e:
             logger.error(f"Reranking failed for query {i+1}: {e}")
     return all_docs
+
+
+def get_reference_sync(
+        split_query: List[str],
+        included_pdfs: List[str]
+) -> List[Dict[str, Any]]:
+    """Synchronous version for backward compatibility"""
+    import asyncio
+    return asyncio.run(get_reference(split_query, included_pdfs))

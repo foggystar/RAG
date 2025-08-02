@@ -129,6 +129,11 @@
                             <span id="query-text">Get Answer</span>
                             <div id="query-loading" class="loading mx-auto hidden"></div>
                         </button>
+                        <button type="button" id="stream-query-btn"
+                                class="w-full mt-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                            <span id="stream-query-text">Get Streaming Answer</span>
+                            <div id="stream-query-loading" class="loading mx-auto hidden"></div>
+                        </button>
                     </form>
                     <div id="active-pdfs-display" class="mt-4 p-3 bg-gray-100 rounded-md hidden">
                         <p class="text-sm font-medium text-gray-700">Using PDFs: <span id="active-pdfs-list"></span></p>
@@ -326,15 +331,8 @@
                     const answerSection = document.getElementById('answer-section');
                     const answerContent = document.getElementById('answer-content');
                     
-                    // Convert markdown to HTML (basic conversion)
-                    const htmlAnswer = result.data.answer
-                        .replace(/### (.*)/g, '<h3>$1</h3>')
-                        .replace(/## (.*)/g, '<h2>$1</h2>')
-                        .replace(/# (.*)/g, '<h1>$1</h1>')
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/`(.*?)`/g, '<code>$1</code>')
-                        .replace(/\n/g, '<br>');
+                    // Use enhanced markdown to HTML conversion (same as streaming)
+                    const htmlAnswer = markdownToHtml(result.data.answer);
                     
                     answerContent.innerHTML = htmlAnswer;
                     answerSection.classList.remove('hidden');
@@ -350,6 +348,259 @@
                 queryLoading.classList.add('hidden');
             }
         });
+
+        // 4.1. Streaming Query functionality
+        document.getElementById('stream-query-btn').addEventListener('click', async function() {
+            const query = document.getElementById('user-query').value.trim();
+            
+            if (!query) {
+                showToast('Please enter a question', 'error');
+                return;
+            }
+            
+            if (activePdfs.length === 0) {
+                showToast('Please select at least one PDF first', 'error');
+                return;
+            }
+            
+            const streamQueryText = document.getElementById('stream-query-text');
+            const streamQueryLoading = document.getElementById('stream-query-loading');
+            
+            streamQueryText.style.display = 'none';
+            streamQueryLoading.classList.remove('hidden');
+            
+            // Show answer section and clear previous content
+            const answerSection = document.getElementById('answer-section');
+            const answerContent = document.getElementById('answer-content');
+            answerContent.innerHTML = '<div class="text-gray-600 animate-pulse">🤖 Generating streaming answer...</div>';
+            answerSection.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/query/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        active_pdfs: activePdfs 
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullAnswer = '';
+                
+                // Clear the "generating" message
+                answerContent.innerHTML = '';
+                
+                // Create a streaming indicator
+                const streamingIndicator = document.createElement('div');
+                streamingIndicator.className = 'text-blue-600 text-sm mb-2';
+                streamingIndicator.innerHTML = '📡 Streaming... <span class="animate-pulse">●</span>';
+                answerContent.appendChild(streamingIndicator);
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'markdown-content';
+                answerContent.appendChild(contentDiv);
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        // Remove streaming indicator when done
+                        streamingIndicator.remove();
+                        break;
+                    }
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const content = line.slice(6); // Remove 'data: ' prefix
+                            
+                            if (content === '[DONE]') {
+                                streamingIndicator.remove();
+                                break;
+                            }
+                            
+                            if (content.trim() && !content.startsWith('Error:')) {
+                                fullAnswer += content;
+                                
+                                // Real-time markdown conversion and display
+                                const htmlAnswer = markdownToHtml(fullAnswer);
+                                contentDiv.innerHTML = htmlAnswer;
+                                
+                                // Auto-scroll to bottom
+                                answerContent.scrollTop = answerContent.scrollHeight;
+                            } else if (content.startsWith('Error:')) {
+                                // Handle errors
+                                contentDiv.innerHTML = `<div class="text-red-600">${content}</div>`;
+                                streamingIndicator.remove();
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                showToast('Streaming answer completed successfully', 'success');
+                
+            } catch (error) {
+                console.error('Streaming error:', error);
+                showToast('Error processing streaming query: ' + error.message, 'error');
+                answerContent.innerHTML = `<div class="text-red-600">❌ Error occurred while generating answer: ${error.message}</div>`;
+            } finally {
+                streamQueryText.style.display = 'inline';
+                streamQueryLoading.classList.add('hidden');
+            }
+        });
+
+        // Enhanced markdown to HTML converter with better formatting
+        function markdownToHtml(markdown) {
+            console.log('Original markdown:', markdown.substring(0, 300) + '...');
+            
+            // Pre-process to fix common formatting issues
+            let text = markdown
+                // Fix concatenated titles - add line breaks before headers  
+                .replace(/([^#\n])(#{1,6}\s)/g, '$1\n\n$2')
+                // Fix titles that got concatenated with content
+                .replace(/^([^#\n]*?)(\s+##\s)/g, '$1\n\n$2')
+                // Fix missing line breaks after sentences ending with punctuation
+                .replace(/([.!?:。！？：])\s+([A-Z\u4e00-\u9fa5][^\n]*?)(\s+[1-9]\.|##|$)/g, '$1\n\n$2$3')
+                // Fix missing line breaks before numbered lists
+                .replace(/([^:\n])\s*(\d+\.\s)/g, '$1\n\n$2')
+                // Fix missing line breaks before bullet lists  
+                .replace(/([^:\n])\s*([-*]\s)/g, '$1\n\n$2')
+                // Fix table formatting - ensure proper spacing
+                .replace(/\|\s*([^|]*?)\s*\|/g, '| $1 |')
+                // Remove standalone "Image" text
+                .replace(/\bImage\s*$/gm, '')
+                // Fix special image format: "参考图片📷 filename"
+                .replace(/参考图片\s*📷\s*([^\s\n]+)/g, '\n\n参考图片\n📷 $1\n\n')
+                // Fix missing line breaks around special markers
+                .replace(/([^:\n])\s*(参考图片)/g, '$1\n\n$2')
+                // Clean up excessive whitespace but preserve line structure
+                .replace(/[ \t]+/g, ' ')  // Multiple spaces/tabs to single space
+                .replace(/\n[ \t]+/g, '\n')  // Remove leading spaces on lines
+                .replace(/[ \t]+\n/g, '\n')  // Remove trailing spaces on lines
+                .replace(/\n{3,}/g, '\n\n');  // Multiple newlines to double newline
+
+            console.log('Pre-processed text:', text.substring(0, 500) + '...');
+
+            // Convert to HTML with improved styling
+            return text
+                // Headers with visual hierarchy - ensure they're on separate lines
+                .replace(/^### (.+)$/gm, '\n<h3 class="text-lg font-bold mt-6 mb-3 text-gray-800 border-b border-gray-200 pb-1">$1</h3>\n')
+                .replace(/^## (.+)$/gm, '\n<h2 class="text-xl font-bold mt-8 mb-4 text-gray-800 border-b-2 border-blue-200 pb-2">$1</h2>\n')
+                .replace(/^# (.+)$/gm, '\n<h1 class="text-2xl font-bold mt-10 mb-5 text-gray-900 border-b-2 border-blue-400 pb-3">$1</h1>\n')
+                
+                // Process tables row by row with better detection
+                .replace(/^\|(.+)\|$/gm, function(match, content) {
+                    if (content.includes('---') || content.trim() === '') return ''; // Skip separator rows and empty rows
+                    const cells = content.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+                    if (cells.length === 0) return '';
+                    
+                    const isHeader = /符号|Symbol|引脚|Pin|描述|Description/.test(cells.join(''));
+                    const tag = isHeader ? 'th' : 'td';
+                    const baseClass = isHeader ? 'bg-blue-50 font-semibold text-blue-900' : 'hover:bg-gray-50';
+                    
+                    return `<tr>${cells.map(cell => `<${tag} class="border border-gray-300 px-3 py-2 text-sm ${baseClass}">${cell}</${tag}>`).join('')}</tr>`;
+                })
+                
+                // Wrap table rows in proper table structure
+                .replace(/(<tr>[\s\S]*?<\/tr>\s*)+/g, function(match) {
+                    return `\n<div class="overflow-x-auto my-6"><table class="w-full border-collapse border-2 border-gray-400 shadow-sm rounded-lg">${match}</table></div>\n`;
+                })
+                
+                // Text formatting
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em class="italic text-gray-700">$1</em>')
+                .replace(/`([^`]+)`/g, '<code class="bg-blue-50 text-blue-800 px-2 py-1 rounded text-sm font-mono border">$1</code>')
+                
+                // Handle special image text format like "参考图片\n📷 _page_1_Figure_6.jpeg"
+                .replace(/参考图片\s*\n?\s*📷\s*([^\s\n]+)/g, function(match, filename) {
+                    let imageSrc = filename.trim();
+                    if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
+                        if (imageSrc.startsWith('_page_')) {
+                            imageSrc = `/docs/74HC165D/${imageSrc}`;
+                        } else {
+                            imageSrc = `/docs/${imageSrc}`;
+                        }
+                    }
+                    return `\n<div class="my-6 text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <img src="${imageSrc}" alt="参考图片" class="max-w-full h-auto mx-auto rounded-lg shadow-lg border border-gray-200" style="max-height: 600px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+                        <div style="display:none" class="text-red-500 text-sm mt-2 p-3 bg-red-50 rounded border border-red-200">
+                            🖼️ 图片加载失败: ${imageSrc}
+                            <br><span class="text-xs mt-1 block">请检查图片路径是否正确</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-3 font-medium">📷 ${filename.trim()}</p>
+                    </div>\n`;
+                })
+                
+                // Standard markdown images
+                .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, src) {
+                    let imageSrc = src.trim();
+                    if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
+                        if (imageSrc.startsWith('_page_')) {
+                            imageSrc = `/docs/74HC165D/${imageSrc}`;
+                        } else {
+                            imageSrc = `/docs/${imageSrc}`;
+                        }
+                    }
+                    const filename = src.split('/').pop() || src;
+                    return `\n<div class="my-6 text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <img src="${imageSrc}" alt="${alt || '参考图片'}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg border border-gray-200" style="max-height: 600px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+                        <div style="display:none" class="text-red-500 text-sm mt-2 p-3 bg-red-50 rounded border border-red-200">
+                            🖼️ 图片加载失败: ${imageSrc}
+                            <br><span class="text-xs mt-1 block">请检查图片路径是否正确</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-3 font-medium">📷 ${filename}</p>
+                    </div>\n`;
+                })
+                
+                // Links
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline font-medium transition-colors">$1</a>')
+                
+                // Lists with better formatting - ensure they're on separate lines
+                .replace(/^(\d+)\.\s+(.+)$/gm, '\n<li class="mb-2 pl-2 leading-relaxed">$2</li>')
+                .replace(/^[-*]\s+(.+)$/gm, '\n<li class="mb-2 pl-2 leading-relaxed">$1</li>')
+                
+                // Wrap lists properly - distinguish numbered vs bullet lists
+                .replace(/(<li class="mb-2 pl-2 leading-relaxed">[\s\S]*?<\/li>\s*)+/g, function(match) {
+                    // Check if it contains numbered content by examining the original list items
+                    const hasNumbers = /^\n<li[^>]*>\d+[.)]\s/.test(match) || /第\d+页|引脚\d+/.test(match);
+                    const listType = hasNumbers ? 'ol' : 'ul';
+                    const listClass = hasNumbers ? 'list-decimal' : 'list-disc';
+                    return `\n<${listType} class="${listClass} pl-6 mb-6 space-y-2 text-gray-700">${match}</${listType}>\n`;
+                })
+                
+                // Split content into paragraphs - handle double newlines
+                .split(/\n\s*\n/)
+                .map(paragraph => {
+                    // Don't wrap certain elements in paragraphs
+                    if (paragraph.trim() === '' || 
+                        paragraph.includes('<h1') || paragraph.includes('<h2') || paragraph.includes('<h3') ||
+                        paragraph.includes('<table') || paragraph.includes('<div class="overflow') ||
+                        paragraph.includes('<ul') || paragraph.includes('<ol') ||
+                        paragraph.includes('<div class="my-6')) {
+                        return paragraph;
+                    }
+                    return `<p class="mb-4 leading-relaxed text-gray-700">${paragraph.trim()}</p>`;
+                })
+                .join('\n')
+                
+                // Clean up HTML structure
+                .replace(/<p class="mb-4 leading-relaxed text-gray-700"><\/p>/g, '') // Remove empty paragraphs
+                .replace(/(<h[1-6][^>]*>)\s*<\/p>/g, '$1') // Remove paragraph tags after headers
+                .replace(/<p class="mb-4 leading-relaxed text-gray-700">\s*(<h[1-6])/g, '$1') // Remove paragraph tags before headers
+                
+                // Clean up any remaining formatting issues
+                .replace(/\n+/g, '\n')
+                .replace(/^\s+|\s+$/g, ''); // Trim start and end
+        }
 
         // 5. Clear database
         document.getElementById('clear-btn').addEventListener('click', async function() {

@@ -4,7 +4,7 @@ Provides centralized client creation and management for OpenAI-compatible APIs.
 """
 
 from typing import Optional, List, Dict, Any
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 import requests
 from config import Config, ModelType, DatabaseConfig
 from utils.colored_logger import get_colored_logger
@@ -57,8 +57,7 @@ class RerankClient:
         self,
         query: str,
         documents: List[str],
-        top_n: int,
-        model: Optional[str] = None
+        top_n: int
     ) -> List[str]:
         """
         批量获取文档重排序结果
@@ -83,7 +82,7 @@ class RerankClient:
         url = f"{self.base_url}/rerank"
         
         payload = {
-            "model": Config.MODELS[ModelType.RERANK].name,
+            "model": self.model_config.name,
             "query": query,
             "documents": documents,
             "top_n": top_n
@@ -107,12 +106,16 @@ class EmbeddingClient:
     
     def __init__(self, api_key: Optional[str] = None):
         self.client = APIClientFactory.get_client(api_key)
+        self.async_client = AsyncOpenAI(
+            api_key=api_key or Config.get_api_key(),
+            base_url=Config.API_BASE_URL
+        )
         self.model_config = Config.get_model_config(ModelType.EMBEDDING)
-    
-    def create_embedding(self, text: str) -> list[float]:
-        """Create embedding for a single text"""
+
+    async def create_embedding_async(self, text: str) -> list[float]:
+        """Create embedding for a single text asynchronously"""
         try:
-            response = self.client.embeddings.create(
+            response = await self.async_client.embeddings.create(
                 model="Qwen/Qwen3-Embedding-4B",
                 input="To embedding: " + text,
                 dimensions=DatabaseConfig.dimensions
@@ -131,17 +134,15 @@ class ChatClient:
     
     def create_completion(
         self, 
-        messages: List[Any], 
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None
+        messages: List[Any]
     ) -> str:
         """Create a chat completion"""
         try:
             response = self.client.chat.completions.create(
                 model=self.model_config.name,
                 messages=messages,
-                max_tokens=max_tokens or self.model_config.max_tokens,
-                temperature=temperature or self.model_config.temperature
+                max_tokens=self.model_config.max_tokens,
+                temperature=self.model_config.temperature
             )
             
             content = response.choices[0].message.content

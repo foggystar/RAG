@@ -11,16 +11,7 @@ logger = get_colored_logger(__name__)
 from config import Config, ModelType, DatabaseConfig
 
 def chunk_with_metadata(markdown_content: str, metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    基于metadata将markdown内容进行智能分块
-    
-    Args:
-        markdown_content: PDF转换的markdown内容
-        metadata: 包含table_of_contents的metadata字典
-    
-    Returns:
-        List[Dict]: 分块结果列表, 每个元素包含content和metadata
-    """
+
     chunks = []
     
     # 过滤掉重复的标题和页眉页脚

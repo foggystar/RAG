@@ -2,76 +2,50 @@ import os
 import sys
 from typing import List, Optional, Dict, Any
 
-# 设置彩色日志
-from .colored_logger import get_colored_logger
-logger = get_colored_logger(__name__)
-
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rag_modules import refer
 from api_client import ChatClient
 from config import Config, ModelType
-
+from utils.colored_logger import get_colored_logger
+logger = get_colored_logger(__name__)
 
 def split_query(
-    query: List[str],
-    api_key: Optional[str] = None
+    query: str
 ) -> List[str]:
     """
     Split a complex query into 2-3 sub-questions
     
     Args:
         query: The query to split
-        api_key: Optional API key, will use config default if not provided
         
     Returns:
         List of sub-questions
     """
+    logger.info(f"Splitting query: {query}")
     try:
-        client = ChatClient(api_key, ModelType.SPLIT)
-        
-        # Convert list to string if needed
-        query_text = " ".join(query) if isinstance(query, list) else query
+        client = ChatClient(model_type=ModelType.SPLIT)
         
         messages = [
             {
                 "role": "system", 
-                "content": "Split the query into 2-3 sub-questions. Output only the questions, one per line."
+                "content": "Split the query into 3-4 sub-questions. Output only the questions, with python list format."
             },
-            {"role": "user", "content": query_text}
+            {"role": "user", "content": query}
         ]
     
         content = client.create_completion(messages)
         
-        if content:
-            questions = [line.strip() for line in content.split('\n') if line.strip()]
-            return query+questions if questions else query
-        return query
-    
+        # if content:
+        #     questions = [line.strip() for line in content.split('\n') if line.strip()]
+        #     return query+questions if questions else query
+        # return query
+        return content
+
     except Exception as e:
         logger.warning(f"Failed to split query: {e}")
         return query
-
-
-def query_to_database(question: str, pdfs: List[str]) -> List[Dict[str, Any]]:
-    """
-    Query the database for relevant documents
-    
-    Args:
-        question: The question to search for
-        pdfs: List of PDF names to include in search
-        
-    Returns:
-        List of relevant documents
-    """
-    results = refer.get_reference_with_filter(
-        question, 
-        included_pdfs=pdfs, 
-        limit=Config.DEFAULT_SEARCH_LIMIT
-    )
-    return results if results else []
-
 
 def generate_answer(
     questions: List[str],

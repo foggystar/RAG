@@ -51,9 +51,9 @@ class Config:
             dimensions=768
         ),
         ModelType.SPLIT: ModelConfig(
-            name="Qwen/Qwen3-30B-A3B",
+            name="Qwen/Qwen3-30B-A3B-Instruct-2507",
             max_tokens=1000,
-            temperature=0.7
+            temperature=0.7,
         ),
         ModelType.CHAT: ModelConfig(
             name="moonshotai/Kimi-K2-Instruct",

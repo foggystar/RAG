@@ -1,10 +1,11 @@
-from rag_modules import clear, insert, search, refer, get_database, reranker
+from rag_modules import clear, insert, query, search, refer, get_database, reranker
 # from rag_modules.pdf_manager import PDFManager
-from utils import convert, query, chunk
-from utils.colored_logger import get_colored_logger
+from utils import convert, chunk
+from utils.colored_logger import get_colored_logger, logging
 from config import Config, ModelType, DatabaseConfig
+import ast
 
-logger = get_colored_logger(__name__)
+logger = get_colored_logger(__name__,level=logging.DEBUG)
 
 # chunk_res = chunk.load_and_chunk("./docs/74HC165D/74HC165D.md","./docs/74HC165D/74HC165D_meta.json")
 # clear.clear_database()
@@ -17,34 +18,56 @@ logger = get_colored_logger(__name__)
 # insert.insert_data(chunk_res, "74HC165D")
 
 
-query = ["pin configuration for 74HC165D?"]
+question = "pin configuration for 74HC165D?"
 
-search_results = search.search(
-    query=query,
-    included_pdfs=["74HC165D"]
-)
+split_query = ast.literal_eval(query.split_query(question))
+split_query.insert(0, question)  # Ensure the original question is included
 
+logger.info(f"Split Query Success: {split_query}")
+
+try:
+    search_results = list(search.search(
+        query=split_query,
+        included_pdfs=["74HC165D"]
+    ))
+except Exception as e:
+    print(f"Search operation failed: {e}")
 
 
 reranked_results = []
 for i,result in enumerate(search_results):
-    logger.info(f"Searching for Query {i+1}: {query[i]}")
+    logger.info(f"Searching for Query {i+1}: {split_query[i]}")
     reranked_index = []
     # 从Hit对象中提取text_content
-    contents = [hit.entity.get('text_content') for hit in result]
-    reranked_index.append(reranker.get_rerank(query=query[i], documents=contents, top_n=int(Config.DEFAULT_SEARCH_LIMIT/1.3)))
-
-    # print("\nNon Reranking Results:")
-    # for doc in list(result):
-    #     print("="  * 50)
-    #     print(doc['entity'])
+    contents = [hit.entity.get('text_content') for hit in list(result)]
+    reranked_index = reranker.get_rerank(query=split_query[i], documents=contents, top_n=int(Config.DEFAULT_SEARCH_LIMIT/3))
     
-    logger.info(f"Reranking for query {i+1}")
-    entities = [hit.entity.get('entity') for hit in result]
-    single_res = []
-    for order in reranked_index[i]['results']:
-        single_res.append(entities[order['index']])
+    logger.info(f"Reranking for query {i+1}\n")
+    try:
+        entities = [hit.entity.get('entity') for hit in result]
+        print(entities)
+        # single_res = []
+        # for order in reranked_index['results']:
+        #     single_res.append(entities[order['index']])
+    except Exception as e:
+        logger.error(f"Reranking failed for query {i+1}: {e}")
+        single_res = []
+    # reranked_results.append({f"Question": split_query[i], "Reference": single_res})
 
-    reranked_results.append({f"Question {i+1}": query[i], "Reference": single_res})
+# for res in reranked_results:
+#     print(res)
+"""
+Data structure:
+[
+  {'Question': ... , 'Reference': [...]},
+  ...
+]
+"""
 
-print(reranked_results)
+""" Todo:
+
+Reference去重
+LLM提问,要求复制图片名称
+复制图片到输出路径
+
+"""

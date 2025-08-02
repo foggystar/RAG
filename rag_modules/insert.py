@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
-from config import Config, ModelType, DatabaseConfig
+from config import DatabaseConfig
 
 
 def insert_data(
@@ -31,7 +31,6 @@ def insert_data(
         embeddings = get_embedding(titled_text)
         logger.info(f"Embedding vector generation completed")
         
-        print(type(embeddings))
     except Exception as e:
         logger.error(f"Failed to embed data: {e}")
         return False
@@ -45,7 +44,6 @@ def insert_data(
             }
             for i in range(len(data))
         ]
-        print(type(insert_data))
         # Execute insertion operation
         logger.info(f"Inserting {len(data)} records into collection '{DatabaseConfig.collection_name}'...")
         client.insert(collection_name=DatabaseConfig.collection_name, data=insert_data)

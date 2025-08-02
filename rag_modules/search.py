@@ -1,7 +1,6 @@
 from .embedding import get_embedding
 from .get_database import get_database_client
-from typing import List, Dict, Any, Optional
-import logging
+from typing import List, Dict, Any
 import sys
 import os
 

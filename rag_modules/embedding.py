@@ -22,7 +22,7 @@ def get_embedding(
         start_time = time.time()
         
         try:
-            result = client.create_embedding(text_item)
+            result = await client.create_embedding_async(text_item)
             duration = time.time() - start_time
             logger.info(f"[{index + 1}] {duration:.2f}s ")
             return result

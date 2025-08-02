@@ -1,6 +1,6 @@
-from rag_modules import clear
+from rag_modules import clear, query
 # from rag_modules.pdf_manager import PDFManager
-from utils import convert, query
+from utils import convert
 from utils.colored_logger import get_colored_logger
 import sys
 import logging

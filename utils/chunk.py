@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
-from config import Config, ModelType, DatabaseConfig
+from config import Config, ModelType
 
 def chunk_with_metadata(markdown_content: str, metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
@@ -39,19 +39,19 @@ def chunk_with_metadata(markdown_content: str, metadata: List[Dict[str, Any]]) -
             logger.warning(f"Skipping chunk for '{toc_item['title']}' due to insufficient content length")
             continue
         
-        middle = start_index + DatabaseConfig.chunk_size_limit
+        middle = start_index + Config.DATABASE.chunk_size_limit
         while middle < end_index:
             chunks.append({
-                'content': markdown_content[middle-DatabaseConfig.chunk_size_limit:middle].strip(),
+                'content': markdown_content[middle-Config.DATABASE.chunk_size_limit:middle].strip(),
                 'metadata': {
                     'title': toc_item['title'],
                     'page_id': toc_item['page_id']+1
                 }
             })
-            middle += DatabaseConfig.chunk_size_limit
+            middle += Config.DATABASE.chunk_size_limit
 
         chunks.append({
-            'content': markdown_content[middle-DatabaseConfig.chunk_size_limit:end_index].strip(),
+            'content': markdown_content[middle-Config.DATABASE.chunk_size_limit:end_index].strip(),
             'metadata': {
                 'title': toc_item['title'],
                 'page_id': toc_item['page_id']+1

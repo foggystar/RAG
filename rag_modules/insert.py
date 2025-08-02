@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
-from config import DatabaseConfig
+from config import Config
 
 
 def insert_data(
@@ -45,8 +45,8 @@ def insert_data(
             for i in range(len(data))
         ]
         # Execute insertion operation
-        logger.info(f"Inserting {len(data)} records into collection '{DatabaseConfig.collection_name}'...")
-        client.insert(collection_name=DatabaseConfig.collection_name, data=insert_data)
+        logger.info(f"Inserting {len(data)} records into collection '{Config.DATABASE.collection_name}'...")
+        client.insert(collection_name=Config.DATABASE.collection_name, data=insert_data)
         
         logger.info(f"Data insertion completed, inserted {len(data)} records")
         return True

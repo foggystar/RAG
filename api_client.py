@@ -118,7 +118,7 @@ class EmbeddingClient:
             response = await self.async_client.embeddings.create(
                 model="Qwen/Qwen3-Embedding-4B",
                 input="To embedding: " + text,
-                dimensions=DatabaseConfig.dimensions
+                dimensions=Config.DATABASE.dimensions
             )
             return response.data[0].embedding
         except Exception as e:

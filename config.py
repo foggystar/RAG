@@ -48,7 +48,7 @@ class Config:
     MODELS = {
         ModelType.EMBEDDING: ModelConfig(
             name="Qwen/Qwen3-Embedding-4B",
-            dimensions=768
+            dimensions=DatabaseConfig.dimensions
         ),
         ModelType.SPLIT: ModelConfig(
             name="Qwen/Qwen3-30B-A3B-Instruct-2507",
@@ -56,7 +56,7 @@ class Config:
             temperature=0.7,
         ),
         ModelType.CHAT: ModelConfig(
-            name="moonshotai/Kimi-K2-Instruct",
+            name="deepseek-ai/DeepSeek-V3",
             max_tokens=50000,
             temperature=0.6
         ),

@@ -7,7 +7,7 @@ import os
 # 添加父目录到路径以便导入
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import Config, DatabaseConfig
+from config import Config
 # 设置彩色日志
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
@@ -25,11 +25,11 @@ def search(
         client = get_database_client()
         
         
-        logger.info(f"Searching in collection '{DatabaseConfig.collection_name}' with {len(query)} queries")
+        logger.info(f"Searching in collection {Config.DATABASE.collection_name} with {len(query)} queries")
 
         # 执行搜索 - 使用 Milvus 原生过滤
         search_params = {
-            "collection_name": DatabaseConfig.collection_name,
+            "collection_name": Config.DATABASE.collection_name,
             "data": query_vectors,
             "limit": Config.DEFAULT_SEARCH_LIMIT,
             "filter": f"pdf_name in {included_pdfs}",

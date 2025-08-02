@@ -36,11 +36,7 @@ def split_query(
         ]
     
         content = client.create_completion(messages)
-        
-        # if content:
-        #     questions = [line.strip() for line in content.split('\n') if line.strip()]
-        #     return query+questions if questions else query
-        # return query
+ 
         return content
 
     except Exception as e:
@@ -49,8 +45,7 @@ def split_query(
 
 def generate_answer(
     questions: List[str],
-    reference: List[Dict[str, Any]],
-    api_key: Optional[str] = None,
+    reference: List[str],
     language: str = "chinese"
 ) -> str:
     """
@@ -59,25 +54,25 @@ def generate_answer(
     Args:
         questions: List of questions to answer
         reference: List of reference documents
-        api_key: Optional API key, will use config default if not provided
         language: Language for the response ("chinese" or "english")
         
     Returns:
         Generated answer
     """
     try:
-        client = ChatClient(api_key, ModelType.CHAT)
+        client = ChatClient(model_type=ModelType.CHAT)
         
+        user_prompt = f"Questions: {questions}\n References: {reference}\n"
         
         # Set system prompt based on language
         if language.lower() == "chinese":
-            system_prompt = "You are a helpful assistant that answers questions based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Chinese to answer."
+            system_prompt = "You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Chinese to answer. You need to use markdown format to answer, if you need to use pictures in the reference, copy the image link to the answer as a markdown link format, because the image file will be put besides your response, do not modify any thing about the link."
         else:
-            system_prompt = "You are a helpful assistant that answers questions based on the provided context. Include page numbers from the context in your answer."
+            system_prompt = "You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Englist to answer. You need to use markdown format to answer, if you need to use pictures in the reference, copy the image link to the answer."
         
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Questions:\n{questions}\n\nContext:\n{reference}"}
+            {"role": "user", "content": user_prompt}
         ]
 
         logger.info("Starting answer generation...")
@@ -85,6 +80,12 @@ def generate_answer(
         return content if content else "No answer generated."
     
     except Exception as e:
-        logger.warning(f"Failed to generate answer: {e}")
+        logger.error(f"Failed to generate answer: {e}")
         return "Failed to generate answer due to an error."
 
+if __name__ == "__main__":
+    # Example usage
+    query = "hello"
+ 
+    answer = generate_answer([query], [query])
+    logger.info(f"Generated Answer: {answer}")

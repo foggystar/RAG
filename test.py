@@ -82,4 +82,3 @@ Data structure:
 # for one in all_docs:
 #     print(one)
 print(query.generate_answer(questions=split_query,reference=all_docs))
-

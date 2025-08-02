@@ -11,7 +11,7 @@ logger = get_colored_logger(__name__)
 
 def pdf2md(
         pdf_path: str,
-        markdown_path: str
+        output_dir: str
 ):
     # Set the model cache directory
     logger.info(f"Loading models from {Config.MODEL_DIR}")
@@ -19,14 +19,14 @@ def pdf2md(
     
     # Run the marker_single command
     logger.info(f"Starting PDF to Markdown conversion: {pdf_path}")
-    logger.info(f"Output directory: {os.path.dirname(markdown_path)}")
+    logger.info(f"Output directory: {output_dir}")
     
     # Use Popen to get real-time output
     process = subprocess.Popen([
         'marker_single', 
         pdf_path, 
         '--output_dir', 
-        os.path.dirname(markdown_path)
+        output_dir
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, universal_newlines=True)
     
     # Read output line by line in real-time

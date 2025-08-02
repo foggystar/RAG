@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System - PDF Knowledge Base</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .markdown-content {
+            line-height: 1.6;
+        }
+        .markdown-content h1 { @apply text-2xl font-bold mt-4 mb-2; }
+        .markdown-content h2 { @apply text-xl font-bold mt-3 mb-2; }
+        .markdown-content h3 { @apply text-lg font-bold mt-2 mb-1; }
+        .markdown-content p { @apply mb-2; }
+        .markdown-content ul { @apply list-disc ml-6 mb-2; }
+        .markdown-content ol { @apply list-decimal ml-6 mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-1 rounded text-sm; }
+        .markdown-content pre { @apply bg-gray-100 p-3 rounded mb-2 overflow-x-auto; }
+        .markdown-content table { @apply border-collapse border-2 border-gray-300 mb-2; }
+        .markdown-content th { @apply border border-gray-300 p-2 bg-gray-100 font-bold; }
+        .markdown-content td { @apply border border-gray-300 p-2; }
+        .markdown-content img { @apply max-w-full h-auto my-2; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">RAG System</h1>
+            <p class="text-gray-600">PDF-based Retrieval-Augmented Generation</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <div class="bg-blue-100 px-3 py-1 rounded">
+                    <span class="text-blue-800 font-semibold">Total PDFs: </span>
+                    <span id="total-pdfs" class="text-blue-900">{{ pdf_list|length }}</span>
+                </div>
+                <div class="bg-green-100 px-3 py-1 rounded">
+                    <span class="text-green-800 font-semibold">Active PDFs: </span>
+                    <span id="active-count" class="text-green-900">{{ active_pdfs|length }}</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column - PDF Management -->
+            <div class="space-y-6">
+                <!-- 1. Upload PDF -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">📁 Upload PDF</h2>
+                    <form id="upload-form" class="space-y-4">
+                        <div>
+                            <input type="file" id="pdf-file" accept=".pdf" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                            <span id="upload-text">Upload & Process PDF</span>
+                            <div id="upload-loading" class="loading mx-auto hidden"></div>
+                        </button>
+                    </form>
+                    <div id="upload-result" class="mt-4"></div>
+                </div>
+
+                <!-- 2. Imported PDFs List -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">📚 Imported PDFs</h2>
+                    <div id="pdf-list" class="space-y-2">
+                        {% for pdf in pdf_list %}
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="pdf-{{ loop.index }}" name="selected-pdfs" value="{{ pdf }}"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                   {% if pdf in active_pdfs %}checked{% endif %}>
+                            <label for="pdf-{{ loop.index }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                {{ pdf }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button id="set-active-btn" 
+                                class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                            Set Active PDFs
+                        </button>
+                        <button id="refresh-pdfs" 
+                                class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5. Clear Database -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-red-600">🗑️ Clear Database</h2>
+                    <p class="text-gray-600 mb-4">This will remove all imported PDFs from the database.</p>
+                    <button id="clear-btn" 
+                            class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                        Clear All Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column - Query Interface -->
+            <div class="space-y-6">
+                <!-- 4. Query Interface -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">💬 Ask Questions</h2>
+                    <form id="query-form" class="space-y-4">
+                        <div>
+                            <label for="user-query" class="block text-sm font-medium text-gray-700 mb-2">
+                                Your Question:
+                            </label>
+                            <textarea id="user-query" name="query" rows="4" 
+                                      placeholder="Enter your question about the selected PDFs..."
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"></textarea>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                            <span id="query-text">Get Answer</span>
+                            <div id="query-loading" class="loading mx-auto hidden"></div>
+                        </button>
+                    </form>
+                    <div id="active-pdfs-display" class="mt-4 p-3 bg-gray-100 rounded-md hidden">
+                        <p class="text-sm font-medium text-gray-700">Using PDFs: <span id="active-pdfs-list"></span></p>
+                    </div>
+                </div>
+
+                <!-- Answer Display -->
+                <div id="answer-section" class="bg-white rounded-lg shadow-md p-6 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">🤖 Answer</h2>
+                    <div id="answer-content" class="prose max-w-none markdown-content bg-gray-50 p-4 rounded-md"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 p-4 rounded-md shadow-lg hidden z-50">
+        <div id="toast-message" class="text-white font-semibold"></div>
+    </div>
+
+    <script>
+        // Global state
+        let activePdfs = {{ active_pdfs | tojson }};
+
+        // Utility functions
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function updateActivePdfsDisplay() {
+            document.getElementById('active-count').textContent = activePdfs.length;
+            const display = document.getElementById('active-pdfs-display');
+            const list = document.getElementById('active-pdfs-list');
+            
+            if (activePdfs.length > 0) {
+                list.textContent = activePdfs.join(', ');
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        }
+
+        // 1. Upload PDF functionality
+        document.getElementById('upload-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('pdf-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showToast('Please select a PDF file', 'error');
+                return;
+            }
+            
+            const uploadText = document.getElementById('upload-text');
+            const uploadLoading = document.getElementById('upload-loading');
+            
+            uploadText.style.display = 'none';
+            uploadLoading.classList.remove('hidden');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('PDF uploaded and processed successfully', 'success');
+                    fileInput.value = '';
+                    await refreshPdfList();
+                } else {
+                    showToast('Failed to process PDF', 'error');
+                }
+            } catch (error) {
+                showToast('Error uploading PDF: ' + error.message, 'error');
+            } finally {
+                uploadText.style.display = 'inline';
+                uploadLoading.classList.add('hidden');
+            }
+        });
+
+        // 2. Refresh PDF list
+        async function refreshPdfList() {
+            try {
+                const response = await fetch('/api/pdfs');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const pdfList = document.getElementById('pdf-list');
+                    pdfList.innerHTML = '';
+                    
+                    result.data.pdfs.forEach((pdf, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center space-x-2';
+                        div.innerHTML = `
+                            <input type="checkbox" id="pdf-${index}" name="selected-pdfs" value="${pdf}"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                   ${activePdfs.includes(pdf) ? 'checked' : ''}>
+                            <label for="pdf-${index}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                ${pdf}
+                            </label>
+                        `;
+                        pdfList.appendChild(div);
+                    });
+                    
+                    document.getElementById('total-pdfs').textContent = result.data.pdfs.length;
+                }
+            } catch (error) {
+                showToast('Error refreshing PDF list', 'error');
+            }
+        }
+
+        document.getElementById('refresh-pdfs').addEventListener('click', refreshPdfList);
+
+        // 3. Set Active PDFs
+        document.getElementById('set-active-btn').addEventListener('click', async function() {
+            const checkboxes = document.querySelectorAll('input[name="selected-pdfs"]:checked');
+            const selectedPdfs = Array.from(checkboxes).map(cb => cb.value);
+            
+            try {
+                const response = await fetch('/api/set-active-pdfs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pdf_names: selectedPdfs })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    activePdfs = selectedPdfs;
+                    updateActivePdfsDisplay();
+                    showToast(`Set ${selectedPdfs.length} PDFs as active`, 'success');
+                } else {
+                    showToast('Failed to set active PDFs', 'error');
+                }
+            } catch (error) {
+                showToast('Error setting active PDFs', 'error');
+            }
+        });
+
+        // 4. Query functionality
+        document.getElementById('query-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const query = document.getElementById('user-query').value.trim();
+            
+            if (!query) {
+                showToast('Please enter a question', 'error');
+                return;
+            }
+            
+            if (activePdfs.length === 0) {
+                showToast('Please select at least one PDF first', 'error');
+                return;
+            }
+            
+            const queryText = document.getElementById('query-text');
+            const queryLoading = document.getElementById('query-loading');
+            
+            queryText.style.display = 'none';
+            queryLoading.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        active_pdfs: activePdfs 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const answerSection = document.getElementById('answer-section');
+                    const answerContent = document.getElementById('answer-content');
+                    
+                    // Convert markdown to HTML (basic conversion)
+                    const htmlAnswer = result.data.answer
+                        .replace(/### (.*)/g, '<h3>$1</h3>')
+                        .replace(/## (.*)/g, '<h2>$1</h2>')
+                        .replace(/# (.*)/g, '<h1>$1</h1>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/`(.*?)`/g, '<code>$1</code>')
+                        .replace(/\n/g, '<br>');
+                    
+                    answerContent.innerHTML = htmlAnswer;
+                    answerSection.classList.remove('hidden');
+                    
+                    showToast('Answer generated successfully', 'success');
+                } else {
+                    showToast('Failed to get answer', 'error');
+                }
+            } catch (error) {
+                showToast('Error processing query: ' + error.message, 'error');
+            } finally {
+                queryText.style.display = 'inline';
+                queryLoading.classList.add('hidden');
+            }
+        });
+
+        // 5. Clear database
+        document.getElementById('clear-btn').addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/clear', { method: 'DELETE' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    activePdfs = [];
+                    updateActivePdfsDisplay();
+                    await refreshPdfList();
+                    document.getElementById('answer-section').classList.add('hidden');
+                    showToast('Database cleared successfully', 'success');
+                } else {
+                    showToast('Failed to clear database', 'error');
+                }
+            } catch (error) {
+                showToast('Error clearing database', 'error');
+            }
+        });
+
+        // Initialize
+        updateActivePdfsDisplay();
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from .embedding import get_embedding
+from .embedding import get_embedding, get_embedding_async
 from .get_database import get_database_client
 from typing import List, Dict, Any
 import sys
@@ -13,14 +13,15 @@ from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
 
-def search(
+async def search_async(
     query: List[str],
     included_pdfs : List[str]
 ) -> List[Dict[str, Any]]:
+    """Async version for use with FastAPI"""
 
     try:
         # 获取查询向量
-        query_vectors = get_embedding(query)
+        query_vectors = await get_embedding_async(query)
         # 创建Milvus客户端
         client = get_database_client()
         
@@ -44,3 +45,12 @@ def search(
     except Exception as e:
         logger.error(f"Search failed: {e}")
         raise Exception(f"Search operation failed: {e}")
+
+
+def search(
+    query: List[str],
+    included_pdfs : List[str]
+) -> List[Dict[str, Any]]:
+    """Sync wrapper for backward compatibility"""
+    import asyncio
+    return asyncio.run(search_async(query, included_pdfs))

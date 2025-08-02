@@ -1,6 +1,7 @@
 import os
 import sys
 from pymilvus import MilvusClient
+import ast
 
 # Add the parent directory to sys.path to import config
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,7 +10,7 @@ from utils import chunk, convert
 from utils.colored_logger import get_colored_logger
 
 from config import Config
-from rag_modules import get_database, insert
+from rag_modules import get_database, insert, query
 
 logger = get_colored_logger(__name__)
 
@@ -41,14 +42,123 @@ def insert_pdf(pdf_path: str):
 
     logger.info(f"Converted files saved to {output_dir}")
 
-    # chunk_res = chunk.load_and_chunk(f"{pdf_name}.md",f"{pdf_name}_meta.json")
+    markdown_file = os.path.join(output_dir, f"{pdf_name}.md")
+    metadata_file = os.path.join(output_dir, f"{pdf_name}_meta.json")
+    
+    if not os.path.exists(markdown_file) or not os.path.exists(metadata_file):
+        logger.error(f"Conversion failed. Missing files: {markdown_file} or {metadata_file}")
+        return False
 
-    # client = get_database.get_database_client()
+    chunk_res = chunk.load_and_chunk(markdown_file, metadata_file)
 
-    # logger.info(f"Collection list: {client.list_collections()}")
-    # logger.info(f"Collection stats: {client.get_collection_stats(collection_name=Config.DATABASE.collection_name)}")
+    client = get_database.get_database_client()
 
-    # insert.insert_data(chunk_res, f"{pdf_name}")
+    logger.info(f"Collection list: {client.list_collections()}")
+    logger.info(f"Collection stats: {client.get_collection_stats(collection_name=Config.DATABASE.collection_name)}")
+
+    success = insert.insert_data(chunk_res, pdf_name)
+    if success:
+        logger.info(f"Successfully inserted PDF: {pdf_name}")
+        return True
+    else:
+        logger.error(f"Failed to insert PDF: {pdf_name}")
+        return False
+
+
+def set_active_pdfs(pdf_names: list):
+    """
+    Sets which PDFs should be currently used for querying.
+    This is stored in memory for this session or can be persisted.
+    
+    Args:
+        pdf_names: List of PDF names to set as active
+    
+    Returns:
+        bool: True if successful
+    """
+    try:
+        # For now, we'll use a simple approach where the caller manages this
+        # In a real implementation, this could be stored in a session or config file
+        logger.info(f"Set active PDFs: {pdf_names}")
+        return True
+    except Exception as e:
+        logger.error(f"Error setting active PDFs: {e}")
+        return False
+
+
+async def query_pdfs_async(question: str, active_pdf_names: list):
+    """
+    Async version of query_pdfs for use with FastAPI.
+    
+    Args:
+        question: User's question
+        active_pdf_names: List of currently active PDF names
+    
+    Returns:
+        str: Generated answer
+    """
+    try:
+        from rag_modules.search import search_async
+        from rag_modules import reranker, refer
+        from rag_modules.query import split_query, generate_answer
+        
+        logger.info(f"Querying: '{question}' using PDFs: {active_pdf_names}")
+
+        split_query = ast.literal_eval(query.split_query(question))
+        split_query.insert(0, question)  # Ensure the original question is included
+
+        logger.info(f"Split Query Success: {split_query}")
+
+        
+        
+        # Get references and rerank
+        references = refer.get_reference(split_query=split_query, included_pdfs=active_pdf_names)
+        
+        # Generate final answer
+        answer = generate_answer(split_query, references)
+        
+        return answer
+        
+    except Exception as e:
+        logger.error(f"Error querying PDFs: {e}")
+        return f"Error occurred while processing your query: {e}"
+
+
+def query_pdfs(question: str, active_pdf_names: list):
+    """
+    Answers user's question based on the selected PDF(s).
+    
+    Args:
+        question: User's question
+        active_pdf_names: List of currently active PDF names
+    
+    Returns:
+        str: Generated answer
+    """
+    try:
+        from rag_modules import search, reranker, refer
+        from rag_modules.query import split_query, generate_answer
+        
+        logger.info(f"Querying: '{question}' using PDFs: {active_pdf_names}")
+
+        split_query = ast.literal_eval(query.split_query(question))
+        split_query.insert(0, question)  # Ensure the original question is included
+
+        logger.info(f"Split Query Success: {split_query}")
+
+        
+        
+        # Get references and rerank
+        references = refer.get_reference(split_query=split_query, included_pdfs=active_pdf_names)
+        
+        # Generate final answer
+        answer = generate_answer(split_query, references)
+        
+        return answer
+        
+    except Exception as e:
+        logger.error(f"Error querying PDFs: {e}")
+        return f"Error occurred while processing your query: {e}"
 
 
 if __name__ == "__main__":

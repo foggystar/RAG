@@ -13,9 +13,10 @@ from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
 
-def get_embedding(
+async def get_embedding_async(
     text: List[str]
 ) -> List[List[float]]:
+    """Async version for use with FastAPI"""
 
     async def create_single_embedding_with_monitoring(client, text_item, index):
         """创建单个embedding并监控执行"""
@@ -48,4 +49,11 @@ def get_embedding(
         logger.info(f"完成! 总耗时: {total_time:.2f}s | 平均: {total_time/len(text):.2f}s")
         return results
         
-    return asyncio.run(create_embeddings_async())
+    return await create_embeddings_async()
+
+
+def get_embedding(
+    text: List[str]
+) -> List[List[float]]:
+    """Sync wrapper for backward compatibility"""
+    return asyncio.run(get_embedding_async(text))

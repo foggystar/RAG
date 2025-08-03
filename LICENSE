@@ -19,3 +19,23 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+This project includes third-party components under different licenses:
+
+1. Apache License 2.0:
+   - Milvus (Copyright LF AI & Data Foundation)
+   - Full license: ./LICENSE-APACHE-2.0
+
+2. MIT License:
+   - OpenAI API (Copyright (c) 2025 OpenAI)
+   - Full license: ./LICENSE-MIT
+
+3. MIT License:
+   - OpenAI API (Copyright (c) 2018 Sebastián Ramírez)
+   - Full license: ./LICENSE-MIT
+
+4. GNU GPLv3 (external tool, not linked into this project):
+   - Marker (Copyright (C) 2023 Vikas Paruchuri)
+   - This tool is used as a standalone program and does not affect this project's licensing.
+   - Full license: ./LICENSE-GPLv3

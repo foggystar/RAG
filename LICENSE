@@ -25,17 +25,17 @@ This project includes third-party components under different licenses:
 
 1. Apache License 2.0:
    - Milvus (Copyright LF AI & Data Foundation)
-   - Full license: ./LICENSE-APACHE-2.0
+   - Full license: ./LICENSE-Milvus
 
 2. MIT License:
    - OpenAI API (Copyright (c) 2025 OpenAI)
-   - Full license: ./LICENSE-MIT
+   - Full license: ./LICENSE-OpenAI
 
 3. MIT License:
-   - OpenAI API (Copyright (c) 2018 Sebastián Ramírez)
-   - Full license: ./LICENSE-MIT
+   - FastAPI (Copyright (c) 2018 Sebastián Ramírez)
+   - Full license: ./LICENSE-FastAPI
 
 4. GNU GPLv3 (external tool, not linked into this project):
    - Marker (Copyright (C) 2023 Vikas Paruchuri)
    - This tool is used as a standalone program and does not affect this project's licensing.
-   - Full license: ./LICENSE-GPLv3
+   - Full license: ./LICENSE-Marker

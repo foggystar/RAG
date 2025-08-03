@@ -1,3 +1,0 @@
-This is a RAG project, I design it to have the function of 1. import a pdf file 2. tell the user what file has been imported 3. let the user set which pdf(s) need to be currently used 4. answer user's question based on the pdf(s) the users choose 5. clear the imported file
-I have written function for 1. importing: @utils/pdf_manage.py 2. tell: @utils/pdf_manage.py  5. clear:   @rag_modules/clear.py, and within @test.md is a sample way of responding to user's questions
-your task is to build a webpage with FastAPI to fulfill all the above capabilities with user-friendly GUI.

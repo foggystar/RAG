@@ -38,5 +38,8 @@ Thumbs.db
 quick_performance_test.py
 
 # Models
-models/
+models/*
 !models/readme.md
+
+# Processed PDFs
+uploads/

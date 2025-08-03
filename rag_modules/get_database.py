@@ -1,12 +1,9 @@
 from pymilvus import MilvusClient, DataType
-import sys, os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# 设置彩色日志
+from config import Config
 from utils.colored_logger import get_colored_logger
-logger = get_colored_logger(__name__)
 
-from config import DatabaseConfig, Config
+logger = get_colored_logger(__name__)
 
 def get_database_client() -> MilvusClient:
     

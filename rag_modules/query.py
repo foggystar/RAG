@@ -1,13 +1,8 @@
-import os
-import sys
-from typing import List, Optional, Dict, Any
+from typing import List
 
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from rag_modules import refer
 from api_client import ChatClient
-from config import Config, ModelType
+from config import ModelType
+from rag_modules import refer
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
 
@@ -66,9 +61,9 @@ def generate_answer(
         
         # Set system prompt based on language
         if language.lower() == "chinese":
-            system_prompt = """You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Chinese to answer. You need to use markdown format to answer, if you need to use pictures in the reference, in your markdown, write the image link as {pdf_name}/{original_image_link}"""
+            system_prompt = """You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use Chinese to answer. You need to use markdown format to answer, if you need to use pictures in the reference, in your markdown, write the image link as {pdf_name}/{original_image_link}, STRICTLY FOLLOW THIS FORMAT"""
         else:
-            system_prompt = "You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use English to answer. You need to use markdown format to answer, if you need to use pictures in the reference, copy the image link to the answer as a markdown link format, because the image file will be put besides your response, do not modify any thing about the link, JUST COPY THE LINK AND MAKE IT TO BE MARKDOWN."
+            system_prompt = """You are a helpful assistant that answers questions in detail, based on the provided context. Provide page numbers of the context in your answer. You need to answer as detailed as possible and be consistant with the given context. Use English to answer. You need to use markdown format to answer, if you need to use pictures in the reference, in your markdown, write the image link as {pdf_name}/{original_image_link}, STRICTLY FOLLOW THIS FORMAT"""
         
         messages = [
             {"role": "system", "content": system_prompt},

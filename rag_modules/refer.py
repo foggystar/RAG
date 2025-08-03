@@ -1,12 +1,7 @@
-from typing import List, Dict, Optional, Any
-from . import reranker, search
-import sys
-import os
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from typing import List, Dict, Any
 
-from config import Config, ModelType, DatabaseConfig
-from rag_modules import query
+from config import Config
+from rag_modules import reranker, search
 from utils.colored_logger import get_colored_logger, logging
 
 logger = get_colored_logger(__name__,level=logging.INFO)

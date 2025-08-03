@@ -1,12 +1,9 @@
 import os
-import sys
 import subprocess
 
-# Add the parent directory to sys.path to import config
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config import Config
-from .colored_logger import get_colored_logger
+from utils.colored_logger import get_colored_logger
+
 logger = get_colored_logger(__name__)
 
 def pdf2md(

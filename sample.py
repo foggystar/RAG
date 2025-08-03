@@ -1,8 +1,8 @@
-from rag_modules import clear, insert, query, search, refer, get_database, reranker
-# from rag_modules.pdf_manager import PDFManager
-from utils.colored_logger import get_colored_logger, logging
-from config import Config, ModelType, DatabaseConfig
 import ast
+
+from config import Config
+from rag_modules import query, search, reranker
+from utils.colored_logger import get_colored_logger, logging
 
 logger = get_colored_logger(__name__,level=logging.INFO)
 

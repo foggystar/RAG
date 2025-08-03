@@ -1,15 +1,10 @@
-from .embedding import get_embedding, get_embedding_async
-from .get_database import get_database_client
 from typing import List, Dict, Any
-import sys
-import os
-
-# 添加父目录到路径以便导入
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
-# 设置彩色日志
+from rag_modules.embedding import get_embedding_async
+from rag_modules.get_database import get_database_client
 from utils.colored_logger import get_colored_logger
+
 logger = get_colored_logger(__name__)
 
 

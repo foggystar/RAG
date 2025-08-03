@@ -3,10 +3,10 @@ Unified API client factory for the RAG project.
 Provides centralized client creation and management for OpenAI-compatible APIs.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Any
 from openai import OpenAI, AsyncOpenAI
 import requests
-from config import Config, ModelType, DatabaseConfig
+from config import Config, ModelType
 from utils.colored_logger import get_colored_logger
 
 logger = get_colored_logger(__name__)

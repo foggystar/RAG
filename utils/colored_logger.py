@@ -32,7 +32,7 @@ def get_colored_logger(name: Optional[str] = None, level: int = logging.INFO) ->
     # 避免重复配置
     if not logger.handlers:
         handler = logging.StreamHandler()
-        formatter = ColoredFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = ColoredFormatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(level)

@@ -1,14 +1,8 @@
 from pymilvus import MilvusClient
-import sys
-import os
-
-# 添加父目录到路径以便导入
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
-from rag_modules import get_database
-# 设置彩色日志
 from utils.colored_logger import get_colored_logger
+
 logger = get_colored_logger(__name__)
 
 def clear_database():

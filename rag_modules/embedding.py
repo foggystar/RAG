@@ -1,11 +1,6 @@
 from typing import List
-import sys
-import os
 import asyncio
 import time
-
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from api_client import EmbeddingClient
 from config import Config

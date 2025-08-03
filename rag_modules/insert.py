@@ -1,17 +1,11 @@
 from typing import List, Dict, Any
-from .embedding import get_embedding_async
-from .get_database import get_database_client
-import sys
-import os
-
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# 设置彩色日志
-from utils.colored_logger import get_colored_logger
-logger = get_colored_logger(__name__)
 
 from config import Config
+from rag_modules.embedding import get_embedding_async
+from rag_modules.get_database import get_database_client
+from utils.colored_logger import get_colored_logger
+
+logger = get_colored_logger(__name__)
 
 
 async def insert_data(

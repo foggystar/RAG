@@ -1,14 +1,11 @@
 import json
-import re,os,sys
+import os
 from typing import List, Dict, Any
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# 设置彩色日志
+from config import Config
 from utils.colored_logger import get_colored_logger
-logger = get_colored_logger(__name__)
 
-from config import Config, ModelType
+logger = get_colored_logger(__name__)
 
 def chunk_with_metadata(markdown_content: str, metadata: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 

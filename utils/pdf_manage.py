@@ -1,16 +1,11 @@
 import os
-import sys
-from pymilvus import MilvusClient
 import ast
-
-# Add the parent directory to sys.path to import config
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from utils import chunk, convert
-from utils.colored_logger import get_colored_logger
+from pymilvus import MilvusClient
 
 from config import Config
 from rag_modules import get_database, insert, query
+from utils import chunk, convert
+from utils.colored_logger import get_colored_logger
 
 logger = get_colored_logger(__name__)
 

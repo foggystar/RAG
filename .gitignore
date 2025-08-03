@@ -34,12 +34,12 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Performance test files
-quick_performance_test.py
-
 # Models
 models/*
 !models/readme.md
 
 # Processed PDFs
 uploads/
+
+# database files
+database/*

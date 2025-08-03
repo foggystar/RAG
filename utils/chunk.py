@@ -39,24 +39,21 @@ def chunk_with_metadata(markdown_content: str, metadata: List[Dict[str, Any]]) -
             logger.warning(f"Skipping chunk for '{toc_item['title']}' due to insufficient content length")
             continue
         
-        middle = start_index + Config.DATABASE.chunk_size_limit
-        while middle < end_index:
-            chunks.append({
-                'content': markdown_content[middle-Config.DATABASE.chunk_size_limit:middle].strip(),
-                'metadata': {
-                    'title': toc_item['title'],
-                    'page_id': toc_item['page_id']+1
-                }
-            })
-            middle += Config.DATABASE.chunk_size_limit
-
-        chunks.append({
-            'content': markdown_content[middle-Config.DATABASE.chunk_size_limit:end_index].strip(),
-            'metadata': {
-                'title': toc_item['title'],
-                'page_id': toc_item['page_id']+1
-            }
-        })
+        current_pos = start_index
+        while current_pos < end_index:
+            chunk_end = min(current_pos + Config.DATABASE.chunk_size_limit, end_index)
+            chunk_content = markdown_content[current_pos:chunk_end].strip()
+            
+            # 只有当chunk内容长度大于0时才添加
+            if chunk_content:
+                chunks.append({
+                    'content': chunk_content,
+                    'metadata': {
+                        'title': toc_item['title'],
+                        'page_id': toc_item['page_id']+1
+                    }
+                })
+            current_pos = chunk_end
     
     return chunks
 

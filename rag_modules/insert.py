@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from .embedding import get_embedding
+from .embedding import get_embedding_async
 from .get_database import get_database_client
 import sys
 import os
@@ -14,7 +14,7 @@ logger = get_colored_logger(__name__)
 from config import Config
 
 
-def insert_data(
+async def insert_data(
     data : List[Dict[str, Any]],
     pdf_name: str,
 ) -> bool:
@@ -27,13 +27,13 @@ def insert_data(
         client = get_database_client()
 
         logger.info(f"Generating embedding vectors for {len(data)} texts")
-        # print(type(text))
-        embeddings = get_embedding(titled_text)
+        embeddings = await get_embedding_async(titled_text)
         logger.info(f"Embedding vector generation completed")
         
     except Exception as e:
         logger.error(f"Failed to embed data: {e}")
         return False
+    
     try:
         insert_data = [
             {

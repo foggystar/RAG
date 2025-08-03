@@ -39,3 +39,4 @@ quick_performance_test.py
 
 # Models
 models/
+!models/readme.md

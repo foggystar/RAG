@@ -22,6 +22,7 @@ async def get_embedding_async(
         """创建单个embedding并监控执行"""
         start_time = time.time()
         
+        logger.info(f"Embedding text with length {len(text_item)}")
         try:
             result = await client.create_embedding_async(text_item)
             duration = time.time() - start_time
@@ -56,4 +57,27 @@ def get_embedding(
     text: List[str]
 ) -> List[List[float]]:
     """Sync wrapper for backward compatibility"""
-    return asyncio.run(get_embedding_async(text))
+    try:
+        # Check if we're already in an event loop
+        loop = asyncio.get_running_loop()
+        # If we're in an event loop, we need to use a different approach
+        # Create a new thread to run the async function
+        import concurrent.futures
+        
+        def run_in_thread():
+            # Create a new event loop in this thread
+            new_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(new_loop)
+            try:
+                result = new_loop.run_until_complete(get_embedding_async(text))
+                return result
+            finally:
+                new_loop.close()
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(run_in_thread)
+            return future.result()
+            
+    except RuntimeError:
+        # No event loop running, safe to use asyncio.run()
+        return asyncio.run(get_embedding_async(text))

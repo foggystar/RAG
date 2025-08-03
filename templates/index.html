@@ -32,7 +32,48 @@
         .markdown-content table { @apply border-collapse border-2 border-gray-300 mb-2; }
         .markdown-content th { @apply border border-gray-300 p-2 bg-gray-100 font-bold; }
         .markdown-content td { @apply border border-gray-300 p-2; }
-        .markdown-content img { @apply max-w-full h-auto my-2; }
+        .markdown-content img { 
+            max-width: 100%; 
+            height: auto; 
+            margin: 0.5rem 0; 
+        }
+        
+        /* Enhanced image container styling */
+        .image-container {
+            margin: 1.5rem 0;
+            text-align: center;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            border: 2px dashed #d1d5db;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            max-height: 600px;
+        }
+        
+        .image-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background-color: #fef2f2;
+            border-radius: 0.375rem;
+            border: 1px solid #fecaca;
+        }
+        
+        .image-caption {
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -77,13 +118,19 @@
                     <h2 class="text-xl font-semibold mb-4 text-gray-800">📚 Imported PDFs</h2>
                     <div id="pdf-list" class="space-y-2">
                         {% for pdf in pdf_list %}
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="pdf-{{ loop.index }}" name="selected-pdfs" value="{{ pdf }}"
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                   {% if pdf in active_pdfs %}checked{% endif %}>
-                            <label for="pdf-{{ loop.index }}" class="text-sm font-medium text-gray-700 cursor-pointer">
-                                {{ pdf }}
-                            </label>
+                        <div class="flex items-center justify-between space-x-2 p-2 rounded hover:bg-gray-50">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <input type="checkbox" id="pdf-{{ loop.index }}" name="selected-pdfs" value="{{ pdf }}"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                       {% if pdf in active_pdfs %}checked{% endif %}>
+                                <label for="pdf-{{ loop.index }}" class="text-sm font-medium text-gray-700 cursor-pointer flex-1">
+                                    {{ pdf }}
+                                </label>
+                            </div>
+                            <button onclick="deletePdf('{{ pdf }}')" 
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors duration-200 text-xs">
+                                🗑️
+                            </button>
                         </div>
                         {% endfor %}
                     </div>
@@ -246,14 +293,20 @@
                     
                     result.data.pdfs.forEach((pdf, index) => {
                         const div = document.createElement('div');
-                        div.className = 'flex items-center space-x-2';
+                        div.className = 'flex items-center justify-between space-x-2 p-2 rounded hover:bg-gray-50';
                         div.innerHTML = `
-                            <input type="checkbox" id="pdf-${index}" name="selected-pdfs" value="${pdf}"
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                   ${activePdfs.includes(pdf) ? 'checked' : ''}>
-                            <label for="pdf-${index}" class="text-sm font-medium text-gray-700 cursor-pointer">
-                                ${pdf}
-                            </label>
+                            <div class="flex items-center space-x-2 flex-1">
+                                <input type="checkbox" id="pdf-${index}" name="selected-pdfs" value="${pdf}"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                       ${activePdfs.includes(pdf) ? 'checked' : ''}>
+                                <label for="pdf-${index}" class="text-sm font-medium text-gray-700 cursor-pointer flex-1">
+                                    ${pdf}
+                                </label>
+                            </div>
+                            <button onclick="deletePdf('${pdf}')" 
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors duration-200 text-xs">
+                                🗑️
+                            </button>
                         `;
                         pdfList.appendChild(div);
                     });
@@ -262,6 +315,38 @@
                 }
             } catch (error) {
                 showToast('Error refreshing PDF list', 'error');
+            }
+        }
+
+        // 2.1. Delete specific PDF
+        async function deletePdf(pdfName) {
+            if (!confirm(`Are you sure you want to delete "${pdfName}" and all its associated data? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/pdfs/${encodeURIComponent(pdfName)}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update global active PDFs if the deleted PDF was active
+                    if (activePdfs.includes(pdfName)) {
+                        activePdfs = activePdfs.filter(pdf => pdf !== pdfName);
+                        updateActivePdfsDisplay();
+                    }
+                    
+                    // Refresh the PDF list
+                    await refreshPdfList();
+                    
+                    showToast(`Successfully deleted "${pdfName}"`, 'success');
+                } else {
+                    showToast(`Failed to delete "${pdfName}"`, 'error');
+                }
+            } catch (error) {
+                showToast(`Error deleting "${pdfName}": ${error.message}`, 'error');
             }
         }
 
@@ -462,6 +547,109 @@
         function markdownToHtml(markdown) {
             console.log('Original markdown:', markdown.substring(0, 300) + '...');
             
+            // Helper function to find the correct PDF directory for an image
+            function findImagePath(imageSrc) {
+                console.log('Finding image path for:', imageSrc);
+                
+                // Check if the image path already contains a folder (PDF name)
+                if (imageSrc.includes('/')) {
+                    // Path format: "PDFName/_page_X_Figure_Y.jpeg"
+                    const pdfName = imageSrc.split('/')[0];
+                    console.log('Extracted PDF name from path:', pdfName);
+                    
+                    // Try upload directory first, then docs
+                    const uploadPath = `/uploads/${imageSrc}`;
+                    console.log('Using upload path with folder:', uploadPath);
+                    return uploadPath;
+                } else if (imageSrc.startsWith('_page_')) {
+                    // Legacy format: "_page_X_Figure_Y.jpeg" - try to match with active PDFs
+                    for (const pdfName of activePdfs) {
+                        const uploadPath = `/uploads/${pdfName}/${imageSrc}`;
+                        console.log('Trying legacy path:', uploadPath);
+                        return uploadPath;
+                    }
+                    // Fallback for legacy format
+                    const fallbackPath = `/docs/${imageSrc}`;
+                    console.log('Using legacy fallback path:', fallbackPath);
+                    return fallbackPath;
+                } else {
+                    // For other images, use as-is or try upload directory
+                    const uploadPath = imageSrc.startsWith('/') ? imageSrc : `/uploads/${imageSrc}`;
+                    console.log('Using direct path:', uploadPath);
+                    return uploadPath;
+                }
+            }
+            
+            // Enhanced image error handling - try multiple paths
+            function createImageWithFallback(imageSrc, alt, filename) {
+                console.log('Creating image with fallback for:', filename, 'src:', imageSrc);
+                const fallbackPaths = [];
+                
+                // Extract PDF name from filename if it contains a folder path
+                let pdfName = null;
+                if (filename.includes('/')) {
+                    pdfName = filename.split('/')[0];
+                    console.log('Extracted PDF name from filename:', pdfName);
+                }
+                
+                if (pdfName) {
+                    // If we have a PDF name from the path, use it directly
+                    fallbackPaths.push(`/uploads/${filename}`);
+                    fallbackPaths.push(`/docs/${filename}`);
+                    // Also try without the PDF folder in case structure is different
+                    const imageFile = filename.split('/').pop();
+                    fallbackPaths.push(`/uploads/${pdfName}/${imageFile}`);
+                    fallbackPaths.push(`/docs/${pdfName}/${imageFile}`);
+                } else if (filename.startsWith('_page_')) {
+                    // Legacy page-based images - try each active PDF
+                    for (const activePdf of activePdfs) {
+                        fallbackPaths.push(`/uploads/${activePdf}/${filename}`);
+                        fallbackPaths.push(`/docs/${activePdf}/${filename}`);
+                    }
+                    // Generic fallbacks for legacy format
+                    fallbackPaths.push(`/uploads/${filename}`);
+                    fallbackPaths.push(`/docs/${filename}`);
+                } else {
+                    // For other images, try various directories
+                    fallbackPaths.push(imageSrc);
+                    fallbackPaths.push(`/uploads/${filename}`);
+                    fallbackPaths.push(`/docs/${filename}`);
+                }
+                
+                // Add static directory as final fallback
+                fallbackPaths.push(`/static/${filename.split('/').pop()}`);
+                
+                console.log('Fallback paths generated:', fallbackPaths);
+                const fallbackPathsJson = JSON.stringify(fallbackPaths);
+                const imageId = 'img_' + Math.random().toString(36).substr(2, 9);
+                
+                return `\n<div class="my-6 text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <img id="${imageId}" src="${fallbackPaths[0]}" alt="${alt || '参考图片'}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg border border-gray-200" style="max-height: 600px;" 
+                         onerror="
+                            const paths = ${fallbackPathsJson};
+                            const currentSrc = this.src.split('/').slice(-2).join('/');
+                            let nextIndex = -1;
+                            for(let i = 0; i < paths.length; i++) {
+                                if(paths[i].endsWith(currentSrc) || paths[i] === this.src) {
+                                    nextIndex = i + 1;
+                                    break;
+                                }
+                            }
+                            if(nextIndex > 0 && nextIndex < paths.length) {
+                                this.src = paths[nextIndex];
+                            } else {
+                                this.style.display='none';
+                                this.nextElementSibling.style.display='block';
+                            }
+                         "/>
+                    <div style="display:none" class="text-red-500 text-sm mt-2 p-3 bg-red-50 rounded border border-red-200">
+                        🖼️ 图片加载失败: ${filename.split('/').pop() || filename}
+                        <br><span class="text-xs mt-1 block text-gray-500">已尝试路径: ${fallbackPaths.slice(0, 3).join(', ')}${fallbackPaths.length > 3 ? '...' : ''}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-3 font-medium">📷 ${filename.includes('/') ? filename.split('/').pop() : filename}</p>
+                </div>\n`;
+            }
+            
             // Pre-process to fix common formatting issues
             let text = markdown
                 // Fix concatenated titles - add line breaks before headers  
@@ -478,7 +666,10 @@
                 .replace(/\|\s*([^|]*?)\s*\|/g, '| $1 |')
                 // Remove standalone "Image" text
                 .replace(/\bImage\s*$/gm, '')
-                // Fix special image format: "参考图片📷 filename"
+                // Fix special image format - handle both line-break and compact formats:
+                // "参考图片\n📷 PDFName/_page_X_Figure_Y.jpeg" -> properly formatted version
+                .replace(/参考图片\s*\n\s*📷\s*([^\s\n]+)/g, '\n\n参考图片\n📷 $1\n\n')
+                // "参考图片📷 PDFName/_page_X_Figure_Y.jpeg" (compact) -> properly formatted version  
                 .replace(/参考图片\s*📷\s*([^\s\n]+)/g, '\n\n参考图片\n📷 $1\n\n')
                 // Fix missing line breaks around special markers
                 .replace(/([^:\n])\s*(参考图片)/g, '$1\n\n$2')
@@ -520,45 +711,40 @@
                 .replace(/\*(.+?)\*/g, '<em class="italic text-gray-700">$1</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-blue-50 text-blue-800 px-2 py-1 rounded text-sm font-mono border">$1</code>')
                 
-                // Handle special image text format like "参考图片\n📷 _page_1_Figure_6.jpeg"
-                .replace(/参考图片\s*\n?\s*📷\s*([^\s\n]+)/g, function(match, filename) {
-                    let imageSrc = filename.trim();
+                // Handle special image text format like "参考图片\n📷 PDFName/_page_1_Figure_6.jpeg"
+                .replace(/参考图片\s*\n\s*📷\s*([^\s\n]+)/g, function(match, filename) {
+                    console.log('Processing image format (with line break):', match);
+                    const cleanFilename = filename.trim();
+                    let imageSrc = cleanFilename;
                     if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
-                        if (imageSrc.startsWith('_page_')) {
-                            imageSrc = `/docs/74HC165D/${imageSrc}`;
-                        } else {
-                            imageSrc = `/docs/${imageSrc}`;
-                        }
+                        imageSrc = findImagePath(imageSrc);
                     }
-                    return `\n<div class="my-6 text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <img src="${imageSrc}" alt="参考图片" class="max-w-full h-auto mx-auto rounded-lg shadow-lg border border-gray-200" style="max-height: 600px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
-                        <div style="display:none" class="text-red-500 text-sm mt-2 p-3 bg-red-50 rounded border border-red-200">
-                            🖼️ 图片加载失败: ${imageSrc}
-                            <br><span class="text-xs mt-1 block">请检查图片路径是否正确</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-3 font-medium">📷 ${filename.trim()}</p>
-                    </div>\n`;
+                    // Use the full path as filename to preserve folder structure
+                    return createImageWithFallback(imageSrc, '参考图片', cleanFilename);
+                })
+                // Also handle the compact format "参考图片📷 PDFName/_page_X_Figure_Y.jpeg" (without line break)
+                .replace(/参考图片\s*📷\s*([^\s\n]+)/g, function(match, filename) {
+                    console.log('Processing image format (compact):', match);
+                    const cleanFilename = filename.trim();
+                    let imageSrc = cleanFilename;
+                    if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
+                        imageSrc = findImagePath(imageSrc);
+                    }
+                    // Use the full path as filename to preserve folder structure
+                    return createImageWithFallback(imageSrc, '参考图片', cleanFilename);
                 })
                 
-                // Standard markdown images
+                // Standard markdown images - handle paths with folder structure
                 .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(match, alt, src) {
-                    let imageSrc = src.trim();
+                    console.log('Processing standard markdown image:', match);
+                    const cleanSrc = src.trim();
+                    let imageSrc = cleanSrc;
                     if (!imageSrc.startsWith('http') && !imageSrc.startsWith('/')) {
-                        if (imageSrc.startsWith('_page_')) {
-                            imageSrc = `/docs/74HC165D/${imageSrc}`;
-                        } else {
-                            imageSrc = `/docs/${imageSrc}`;
-                        }
+                        imageSrc = findImagePath(imageSrc);
                     }
-                    const filename = src.split('/').pop() || src;
-                    return `\n<div class="my-6 text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <img src="${imageSrc}" alt="${alt || '参考图片'}" class="max-w-full h-auto mx-auto rounded-lg shadow-lg border border-gray-200" style="max-height: 600px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
-                        <div style="display:none" class="text-red-500 text-sm mt-2 p-3 bg-red-50 rounded border border-red-200">
-                            🖼️ 图片加载失败: ${imageSrc}
-                            <br><span class="text-xs mt-1 block">请检查图片路径是否正确</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-3 font-medium">📷 ${filename}</p>
-                    </div>\n`;
+                    // Use the original src as filename to preserve folder structure
+                    const filename = cleanSrc;
+                    return createImageWithFallback(imageSrc, alt || '参考图片', filename);
                 })
                 
                 // Links

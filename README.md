@@ -76,9 +76,8 @@ RAG/
 │   └── pdf_manage.py     # PDF 管理
 ├── templates/            # Web 模板
 ├── static/              # 静态资源
-├── uploads/             # 上传目录
-├── docs/                # 文档存储
-├── answers/             # 答案保存
+├── uploads/             # 上传目录 & 答案保存
+├── docs/                # 文档存储           
 └── database/            # 数据库文件
 ```
 
@@ -169,7 +168,7 @@ python main.py --clear
 - 详见 `docs/CONCURRENT_EMBEDDING_GUIDE.md`
 
 ### 答案管理
-- 自动保存查询结果到 `answers/` 目录
+- 自动保存查询结果到 `uploads/` 目录
 - 支持 Markdown 格式的结构化答案
 - 包含查询时间、使用文档等元数据
 
@@ -196,23 +195,4 @@ python main.py --clear
 
 ## 许可证
 
-本项目采用开源许可证，具体详见项目根目录下的 LICENSE 文件。
-
-## 贡献指南
-
-欢迎提交 Issue 和 Pull Request 来改进项目。在贡献代码前，请确保：
-
-1. 代码符合项目的编码规范
-2. 添加必要的测试用例
-3. 更新相关文档
-
-## 联系方式
-
-如有问题或建议，请通过以下方式联系：
-
-- 提交 GitHub Issue
-- 发送邮件到项目维护者
-
----
-
-*基于现代 AI 技术构建的智能文档查询系统 | 让知识检索更简单、更智能*
+作者是菜鸡,还没学许可证相关事宜

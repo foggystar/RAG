@@ -33,7 +33,7 @@ def get_pdf_names():
     pdf_names_set = set(result["pdf_name"] for result in results)
     return pdf_names_set
 
-def insert_pdf(pdf_path: str):
+async def insert_pdf(pdf_path: str):
 
     output_dir = os.path.dirname(pdf_path) + "/"
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -42,8 +42,8 @@ def insert_pdf(pdf_path: str):
 
     logger.info(f"Converted files saved to {output_dir}")
 
-    markdown_file = os.path.join(output_dir, f"{pdf_name}.md")
-    metadata_file = os.path.join(output_dir, f"{pdf_name}_meta.json")
+    markdown_file = os.path.join(output_dir, f"{pdf_name}/{pdf_name}.md")
+    metadata_file = os.path.join(output_dir, f"{pdf_name}/{pdf_name}_meta.json")
     
     if not os.path.exists(markdown_file) or not os.path.exists(metadata_file):
         logger.error(f"Conversion failed. Missing files: {markdown_file} or {metadata_file}")
@@ -55,13 +55,14 @@ def insert_pdf(pdf_path: str):
 
     logger.info(f"Collection list: {client.list_collections()}")
     logger.info(f"Collection stats: {client.get_collection_stats(collection_name=Config.DATABASE.collection_name)}")
+    # print(chunk_res)
 
-    success = insert.insert_data(chunk_res, pdf_name)
+    success = await insert.insert_data(chunk_res, pdf_name)
     if success:
         logger.info(f"Successfully inserted PDF: {pdf_name}")
         return True
     else:
-        logger.error(f"Failed to insert PDF: {pdf_name}")
+        logger.error(f"Failed to insert PDF: {pdf_name}")   
         return False
 
 
@@ -168,6 +169,79 @@ async def query_pdfs_stream_async(question: str, active_pdf_names: list):
         yield f"Error occurred while processing your query: {e}"
 
 
+def delete_pdf(pdf_name: str):
+    """
+    Deletes a specific PDF and all its associated data from the Milvus database.
+    
+    Args:
+        pdf_name: Name of the PDF to delete (without extension)
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        logger.info(f"Attempting to delete PDF: {pdf_name}")
+        
+        # Create Milvus client
+        client = MilvusClient(uri=Config.DATABASE.path)
+        
+        # Check if collection exists
+        if not client.has_collection(collection_name=Config.DATABASE.collection_name):
+            logger.warning(f"Collection {Config.DATABASE.collection_name} does not exist")
+            return False
+        
+        # Check if PDF exists in database
+        existing_pdfs = get_pdf_names()
+        if pdf_name not in existing_pdfs:
+            logger.warning(f"PDF '{pdf_name}' not found in database")
+            return False
+        
+        # Delete all records associated with this PDF
+        res = client.delete(
+            collection_name=Config.DATABASE.collection_name,
+            filter=f'pdf_name == "{pdf_name}"'
+        )
+        
+        # Handle different response formats from Milvus
+        delete_count = "unknown"
+        if isinstance(res, dict):
+            delete_count = res.get('delete_count', 'unknown')
+        elif isinstance(res, list):
+            delete_count = len(res)
+        
+        logger.info(f"Successfully deleted PDF '{pdf_name}' from database. Deleted {delete_count} records.")
+        
+        # Optionally, also delete the physical files
+        try:
+            import shutil
+            # Delete from uploads directory
+            upload_file = f"uploads/{pdf_name}.pdf"
+            if os.path.exists(upload_file):
+                os.remove(upload_file)
+                logger.info(f"Deleted physical file: {upload_file}")
+            
+            # Delete from docs directory and its processed folder
+            docs_folder = f"docs/{pdf_name}"
+            if os.path.exists(docs_folder):
+                shutil.rmtree(docs_folder)
+                logger.info(f"Deleted processed folder: {docs_folder}")
+                
+            uploads_folder = f"uploads/{pdf_name}"
+            if os.path.exists(uploads_folder):
+                shutil.rmtree(uploads_folder)
+                logger.info(f"Deleted uploads folder: {uploads_folder}")
+                
+        except Exception as file_error:
+            logger.warning(f"Could not delete physical files for {pdf_name}: {file_error}")
+            # Don't fail the operation if file deletion fails
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error deleting PDF '{pdf_name}': {e}")
+        return False
+
+
 def query_pdfs(question: str, active_pdf_names: list):
     """
     Answers user's question based on the selected PDF(s).
@@ -204,10 +278,12 @@ def query_pdfs(question: str, active_pdf_names: list):
 
 
 if __name__ == "__main__":
+    import asyncio
+    
     print(get_pdf_names())
     # Get the absolute path to ensure it works regardless of where the script is run from
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     pdf_path = os.path.join(project_root, "docs", "74HC165D.pdf")
-    insert_pdf(pdf_path)
+    asyncio.run(insert_pdf(pdf_path))
     

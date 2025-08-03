@@ -14,11 +14,12 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 # Import RAG modules
-from utils.pdf_manage import get_pdf_names, insert_pdf, set_active_pdfs, query_pdfs_async, query_pdfs_stream_async
+from utils.pdf_manage import get_pdf_names, insert_pdf, set_active_pdfs, query_pdfs_async, query_pdfs_stream_async, delete_pdf
 from rag_modules.clear import clear_database
-from utils.colored_logger import get_colored_logger
+from rag_modules import get_database
+from utils.colored_logger import get_colored_logger, logging
 
-logger = get_colored_logger(__name__)
+logger = get_colored_logger(__name__, level=logging.DEBUG)
 
 # Initialize FastAPI app
 app = FastAPI(title="RAG System", description="PDF-based Retrieval-Augmented Generation System")
@@ -28,18 +29,18 @@ os.makedirs("static", exist_ok=True)
 os.makedirs("templates", exist_ok=True)
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("docs", exist_ok=True)  # Ensure docs directory exists
-os.makedirs("answers", exist_ok=True)  # Directory for saving LLM outputs
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/docs", StaticFiles(directory="docs"), name="docs")  # Add docs directory for images
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")  # Add uploads directory for processed PDFs
 templates = Jinja2Templates(directory="templates")
 
 # Global state for active PDFs (in production, use session management)
 active_pdfs = []
 
 def save_answer_to_file(query: str, answer: str, used_pdfs: List[str]) -> str:
-    """Save LLM answer to a file in ./answers directory"""
+    """Save LLM answer to a file in ./uploads directory"""
     try:
         # Create timestamp for filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -48,7 +49,7 @@ def save_answer_to_file(query: str, answer: str, used_pdfs: List[str]) -> str:
         safe_query = safe_query.replace(' ', '_')
         
         filename = f"{timestamp}_{safe_query}.md"
-        filepath = os.path.join("answers", filename)
+        filepath = os.path.join("uploads", filename)
         
         # Create content with metadata
         content = f"""# Query Response - {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -94,6 +95,7 @@ class APIResponse(BaseModel):
 async def home(request: Request):
     """Main page with all RAG functionalities"""
     try:
+        get_database.get_database_client() # 重新获取数据库客户端
         pdf_list = list(get_pdf_names())
         return templates.TemplateResponse("index.html", {
             "request": request,
@@ -111,14 +113,53 @@ async def upload_pdf(file: UploadFile = File(...)):
     try:
         if not file.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+        # 安全处理文件名，防止路径穿越
+        import uuid
+        import re
         
+        # 获取文件扩展名
+        ext = '.pdf'
+        
+        # 清理文件名，只保留安全字符
+        base_name = os.path.splitext(os.path.basename(file.filename))[0]
+        safe_base_name = re.sub(r'[^a-zA-Z0-9._-]', '_', base_name)
+        
+        # 如果文件名为空或只有特殊字符，使用UUID
+        if not safe_base_name or safe_base_name.startswith('.'):
+            safe_filename = f"{uuid.uuid4().hex}{ext}"
+        else:
+            safe_filename = f"{safe_base_name}{ext}"
+        # 确保文件名不会太长
+        if len(safe_filename) > 255:
+            name_part = safe_filename[:250-len(ext)]
+            safe_filename = f"{name_part}{ext}"
+        
+        # 构建安全的上传路径
+        upload_path = os.path.join("uploads", safe_filename)
+        
+        # 额外检查：确保最终路径仍在uploads目录内
+        upload_dir = os.path.abspath("uploads")
+        final_path = os.path.abspath(upload_path)
+        
+        if not final_path.startswith(upload_dir):
+            raise HTTPException(status_code=400, detail="Invalid file path")
+        
+        # 检查文件是否已存在，如果存在则添加序号
+        counter = 1
+        while os.path.exists(upload_path):
+            name, ext = os.path.splitext(safe_filename)
+            safe_filename = f"{name}_{counter}{ext}"
+            upload_path = os.path.join("uploads", safe_filename)
+            counter += 1
+
         # Save uploaded file
-        upload_path = os.path.join("uploads", file.filename)
+        # upload_path = os.path.join("uploads", file.filename)
         with open(upload_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
         # Process the PDF
-        success = insert_pdf(upload_path)
+        success = await insert_pdf(upload_path)
         
         if success:
             return APIResponse(
@@ -168,6 +209,41 @@ async def set_active_pdfs_endpoint(request: SetActivePDFsRequest):
             
     except Exception as e:
         logger.error(f"Error setting active PDFs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 3.1. Delete specific PDF functionality
+@app.delete("/api/pdfs/{pdf_name}")
+async def delete_pdf_endpoint(pdf_name: str):
+    """Delete a specific PDF and all its associated data from the database"""
+    try:
+        global active_pdfs
+        
+        # Check if PDF exists first
+        existing_pdfs = list(get_pdf_names())
+        if pdf_name not in existing_pdfs:
+            raise HTTPException(status_code=404, detail=f"PDF '{pdf_name}' not found")
+        
+        # Remove from active PDFs if it's currently active
+        if pdf_name in active_pdfs:
+            active_pdfs.remove(pdf_name)
+            logger.info(f"Removed '{pdf_name}' from active PDFs list")
+        
+        # Delete the PDF
+        success = delete_pdf(pdf_name)
+        
+        if success:
+            return APIResponse(
+                success=True,
+                message=f"Successfully deleted PDF '{pdf_name}' and all associated data",
+                data={"deleted_pdf": pdf_name, "remaining_active_pdfs": active_pdfs}
+            )
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to delete PDF '{pdf_name}'")
+            
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
+    except Exception as e:
+        logger.error(f"Error deleting PDF '{pdf_name}': {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # 4. Query functionality
@@ -271,7 +347,7 @@ async def health_check():
 async def list_saved_answers():
     """List all saved answer files"""
     try:
-        answers_dir = "answers"
+        answers_dir = "uploads"
         answer_files = []
         
         if os.path.exists(answers_dir):
@@ -332,4 +408,4 @@ async def test_images():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

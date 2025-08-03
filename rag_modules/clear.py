@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import Config
+from rag_modules import get_database
 # 设置彩色日志
 from utils.colored_logger import get_colored_logger
 logger = get_colored_logger(__name__)
@@ -24,3 +25,5 @@ def clear_database():
     # 清除集合中的所有数据
     client.drop_collection(collection_name=Config.DATABASE.collection_name)    
     logger.info(f"集合 {Config.DATABASE.collection_name} 中的数据已被清除")
+
+    

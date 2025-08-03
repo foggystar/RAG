@@ -195,4 +195,6 @@ python main.py --clear
 
 ## 许可证
 
-作者是菜鸡,还没学许可证相关事宜
+MIT License
+
+对于Marker，本项目仅使用其命令行调用方法

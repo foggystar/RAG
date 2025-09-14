@@ -4,9 +4,10 @@ Manages all model settings, API configurations, and database settings.
 """
 
 import os
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
 from enum import Enum
+from pydantic_settings import BaseSettings
 
 
 class ModelType(Enum):
@@ -111,5 +112,66 @@ class Config:
     def get_rerank_model(cls) -> str:
         """Get rerank model name"""
         return cls.MODELS[ModelType.RERANK].name
+
+
+class ServerSettings(BaseSettings):
+    """Server configuration settings"""
+    host: str = "127.0.0.1"
+    port: int = 8000
+    debug: bool = False
+    cors_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_allow_credentials: bool = True
+    cors_allow_methods: List[str] = ["*"]
+    cors_allow_headers: List[str] = ["*"]
+    
+    # Security settings
+    secret_key: str = "your-secret-key-change-in-production"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    
+    # Rate limiting
+    rate_limit_requests: int = 100
+    rate_limit_window: int = 60  # seconds
+    
+    # File upload settings
+    max_file_size: int = 50 * 1024 * 1024  # 50MB
+    allowed_extensions: List[str] = [".pdf"]
+    upload_dir: str = "uploads"
+    
+    # Redis settings (for caching)
+    redis_url: str = "redis://localhost:6379"
+    redis_ttl: int = 3600  # 1 hour
+    
+    # Logging
+    log_level: str = "INFO"
+    log_format: str = "json"
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+
+
+class SecuritySettings(BaseSettings):
+    """Security configuration"""
+    # File security
+    allowed_filename_chars: str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_"
+    max_filename_length: int = 255
+    
+    # Path security
+    base_upload_dir: str = "uploads"
+    allowed_base_dirs: List[str] = ["uploads", "static", "docs"]
+    
+    # API security
+    max_query_length: int = 2000
+    max_pdfs_per_query: int = 10
+    timeout_seconds: int = 300
+    
+    class Config:
+        env_file = ".env"
+
+
+# Global settings instances
+server_settings = ServerSettings()
+security_settings = SecuritySettings()
     
     

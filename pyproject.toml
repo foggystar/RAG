@@ -12,4 +12,24 @@ dependencies = [
     "pdfminer-six>=20250506",
     "pymilvus>=2.5.14",
     "requests>=2.31.0",
+    "slowapi>=0.1.9",
+    "redis>=5.0.1",
+    "prometheus-client>=0.20.0",
+    "structlog>=24.1.0",
+    "pydantic-settings>=2.1.0",
+    "python-multipart>=0.0.9",
+    "aiofiles>=23.2.1",
+    "httpx>=0.27.0",
+    "api-client>=1.3.1",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["rag_modules", "utils"]
+
+[tool.setuptools.package-data]
+rag_modules = ["*"]
+utils = ["*"]
